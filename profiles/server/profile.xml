@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile name="server">
+    <description>Server-oriented NotLFS system with web server, database, and file services</description>
+    <author>NotLFS Team</author>
+    <version>1.0</version>
+    <init_system>runit</init_system>
+    <supported_init_systems>
+        <init>runit</init>
+        <init>s6-rc</init>
+        <init>dinit</init>
+        <init>sysv</init>
+        <init>systemd</init>
+        <init>openrc</init>
+    </supported_init_systems>
+    <inherits>
+        <profile>base</profile>
+    </inherits>
+    <packages>
+        <include profile="base" />
+        <package name="nginx" enabled="true" />
+        <package name="postgresql" enabled="true" />
+        <package name="sqlite" enabled="true" />
+        <package name="redis" enabled="true" />
+        <package name="samba" enabled="true" />
+        <package name="nfs-utils" enabled="true" />
+        <package name="postfix" enabled="true" />
+        <package name="dnsmasq" enabled="true" />
+        <package name="fail2ban" enabled="true" />
+        <package name="iptables" enabled="true" />
+        <package name="chrony" enabled="true" />
+        <package name="cronie" enabled="true" />
+        <package name="rsyslog" enabled="true" />
+        <package name="logrotate" enabled="true" />
+        <package name="sysstat" enabled="true" />
+    </packages>
+    <features>
+        <feature name="minimal">false</feature>
+        <feature name="network">true</feature>
+        <feature name="development">true</feature>
+        <feature name="desktop">false</feature>
+        <feature name="server">true</feature>
+        <feature name="hardening">true</feature>
+        <feature name="headless">true</feature>
+    </features>
+    <server>
+        <type>web</type>
+        <web_server>nginx</web_server>
+        <database>postgresql</database>
+        <file_server>samba</file_server>
+        <mail_server>postfix</mail_server>
+        <dns_server>dnsmasq</dns_server>
+        <monitoring>sysstat</monitoring>
+        <logging>rsyslog</logging>
+        <security>fail2ban</security>
+        <time_sync>chrony</time_sync>
+        <cron>cronie</cron>
+    </server>
+    <build>
+        <optimization>-O2 -pipe</optimization>
+        <jobs>$(nproc)</jobs>
+        <strip_debug>false</strip_debug>
+        <keep_sources>false</keep_sources>
+    </build>
+    <network>
+        <hostname>notlfs-server</hostname>
+        <enable_dhcp>true</enable_dhcp>
+        <enable_ipv6>true</enable_ipv6>
+    </network>
+</profile>

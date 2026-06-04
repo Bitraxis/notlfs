@@ -1,0 +1,16 @@
+include base
+nginx
+postgresql
+sqlite
+redis
+samba
+nfs-utils
+postfix
+dnsmasq
+fail2ban
+iptables
+chrony
+cronie
+rsyslog
+logrotate
+sysstat

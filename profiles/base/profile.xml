@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile name="base">
+    <description>Complete NotLFS system with development tools, networking, and essential utilities</description>
+    <author>NotLFS Team</author>
+    <version>1.0</version>
+    <init_system>s6-rc</init_system>
+    <supported_init_systems>
+        <init>s6</init>
+        <init>s6-rc</init>
+        <init>dinit</init>
+        <init>runit</init>
+        <init>sysv</init>
+        <init>systemd</init>
+        <init>openrc</init>
+    </supported_init_systems>
+    <packages>
+        <include category="core" />
+        <include category="init" />
+        <include category="dev" />
+        <include category="utils" />
+        <include category="network" />
+        <include category="languages" />
+        <package name="vim" enabled="true" />
+        <package name="nano" enabled="true" />
+        <package name="less" enabled="true" />
+        <package name="man-db" enabled="true" />
+        <package name="iproute2" enabled="true" />
+        <package name="curl" enabled="true" />
+        <package name="wget" enabled="true" />
+        <package name="openssh" enabled="true" />
+        <package name="procps" enabled="true" />
+        <package name="htop" enabled="true" />
+    </packages>
+    <features>
+        <feature name="minimal">false</feature>
+        <feature name="network">true</feature>
+        <feature name="development">true</feature>
+        <feature name="desktop">false</feature>
+        <feature name="server">false</feature>
+        <feature name="hardening">true</feature>
+        <feature name="strip_debug">false</feature>
+        <feature name="documents">true</feature>
+    </features>
+    <build>
+        <optimization>-O2 -pipe</optimization>
+        <jobs>$(nproc)</jobs>
+        <strip_debug>false</strip_debug>
+        <keep_sources>false</keep_sources>
+    </build>
+    <network>
+        <hostname>notlfs-base</hostname>
+        <enable_dhcp>true</enable_dhcp>
+        <nameservers>8.8.8.8 8.8.4.4</nameservers>
+    </network>
+</profile>

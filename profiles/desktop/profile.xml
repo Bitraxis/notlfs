@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile name="desktop">
+    <description>Full NotLFS desktop system with KDE Plasma, graphical applications, and multimedia support</description>
+    <author>NotLFS Team</author>
+    <version>1.0</version>
+    <init_system>s6-rc</init_system>
+    <supported_init_systems>
+        <init>s6-rc</init>
+        <init>systemd</init>
+        <init>openrc</init>
+        <init>runit</init>
+    </supported_init_systems>
+    <inherits>
+        <profile>base</profile>
+    </inherits>
+    <packages>
+        <include profile="base" />
+        <include category="desktop" />
+        <include category="graphics" />
+        <package name="kf5-plasma" enabled="true" />
+        <package name="kf5-plasma-desktop" enabled="true" />
+        <package name="kf5-kwin" enabled="true" />
+        <package name="kf5-kate" enabled="true" />
+        <package name="kf5-konsole" enabled="true" />
+        <package name="kf5-dolphin" enabled="true" />
+        <package name="sddm" enabled="true" />
+        <package name="mesa" enabled="true" />
+        <package name="xorg-server" enabled="true" />
+        <package name="pulseaudio" enabled="true" />
+        <package name="alsa-lib" enabled="true" />
+        <package name="alsa-utils" enabled="true" />
+        <package name="ffmpeg" enabled="true" />
+        <package name="mpv" enabled="true" />
+        <package name="firefox" enabled="true" />
+        <package name="networkmanager" enabled="true" />
+        <package name="dbus" enabled="true" />
+        <package name="elogind" enabled="true" />
+        <package name="udisks2" enabled="true" />
+        <package name="polkit" enabled="true" />
+    </packages>
+    <features>
+        <feature name="minimal">false</feature>
+        <feature name="network">true</feature>
+        <feature name="development">true</feature>
+        <feature name="desktop">true</feature>
+        <feature name="server">false</feature>
+        <feature name="hardening">true</feature>
+        <feature name="gui">true</feature>
+        <feature name="sound">true</feature>
+        <feature name="video">true</feature>
+    </features>
+    <desktop>
+        <environment>kde</environment>
+        <display_manager>sddm</display_manager>
+        <window_manager>kwin</window_manager>
+        <wayland_support>true</wayland_support>
+        <x11_support>true</x11_support>
+    </desktop>
+    <network>
+        <hostname>notlfs-desktop</hostname>
+        <enable_dhcp>true</enable_dhcp>
+        <enable_wifi>true</enable_wifi>
+        <enable_bluetooth>true</enable_bluetooth>
+    </network>
+</profile>

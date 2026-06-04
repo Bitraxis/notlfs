@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile name="minimal">
+    <description>Absolute minimal NotLFS system with only essential packages for a bootable Linux</description>
+    <author>NotLFS Team</author>
+    <version>1.0</version>
+    <init_system>s6</init_system>
+    <supported_init_systems>
+        <init>s6</init>
+        <init>s6-rc</init>
+        <init>dinit</init>
+        <init>runit</init>
+        <init>sysv</init>
+    </supported_init_systems>
+    <packages>
+        <include category="core" />
+        <include category="init" />
+        <package name="util-linux" enabled="true" />
+        <package name="e2fsprogs" enabled="true" />
+        <package name="iana-etc" enabled="true" />
+        <package name="bash" enabled="true" />
+        <package name="coreutils" enabled="true" />
+        <package name="diffutils" enabled="true" />
+        <package name="findutils" enabled="true" />
+        <package name="gawk" enabled="true" />
+        <package name="grep" enabled="true" />
+        <package name="gzip" enabled="true" />
+        <package name="sed" enabled="true" />
+        <package name="tar" enabled="true" />
+        <package name="xz" enabled="true" />
+    </packages>
+    <features>
+        <feature name="minimal">true</feature>
+        <feature name="network">false</feature>
+        <feature name="development">false</feature>
+        <feature name="desktop">false</feature>
+        <feature name="server">false</feature>
+        <feature name="hardening">true</feature>
+        <feature name="strip_debug">true</feature>
+    </features>
+    <build>
+        <optimization>-Os -pipe</optimization>
+        <jobs>$(nproc)</jobs>
+        <strip_debug>true</strip_debug>
+        <keep_sources>false</keep_sources>
+    </build>
+    <security>
+        <stack_protector>true</stack_protector>
+        <fortify_source>true</fortify_source>
+        <relro>true</relro>
+        <aslr>true</aslr>
+        <pie>true</pie>
+    </security>
+    <hooks>
+        <hook stage="pre-toolchain">echo "Building minimal profile - optimizing for size"</hook>
+        <hook stage="post-system">echo "NotLFS Minimal" > ${LFS}/etc/issue && echo "Kernel \r on an \m" >> ${LFS}/etc/issue</hook>
+        <hook stage="post-install">echo "notlfs-minimal" > ${LFS}/etc/hostname</hook>
+    </hooks>
+</profile>

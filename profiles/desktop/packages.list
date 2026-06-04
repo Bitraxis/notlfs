@@ -1,0 +1,24 @@
+include base
+mesa
+xorg-server
+xorg-apps
+xorg-drivers
+xorg-fonts
+pulseaudio
+alsa-lib
+alsa-utils
+ffmpeg
+mpv
+sddm
+kf5-plasma
+kf5-plasma-desktop
+kf5-kwin
+kf5-kate
+kf5-konsole
+kf5-dolphin
+firefox
+networkmanager
+dbus
+elogind
+udisks2
+polkit

@@ -6,7 +6,6 @@
 #   3. desktop   - Full desktop environment with KDE Plasma
 #   4. server    - Server-oriented system with web and database services
 
-set -o errexit
 set -o nounset
 set -o pipefail
 
