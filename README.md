@@ -3,7 +3,7 @@
 
 > **Preamble** Yes the docs are AI made, I'm too lazy, the actual code and scripts and the ideas were mine handwritten over weeks of work, still unfinished
 > 
-> **NotLFS** (Not Linux From Scratch) is a smart, extensible framework for building custom Linux systems from source, with multi-init system support.
+> **NotLFS** [NotLFS Site](http://notlfs.page.gd/)(Not Linux From Scratch) is a smart, extensible framework for building custom Linux systems from source, with multi-init system support.
 
 ---
 
