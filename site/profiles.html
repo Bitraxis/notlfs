@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Profiles - NotLFS</title>
+    <style>
+        /* Same styles as index.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; line-height: 1.6; color: #000; background: #fff; }
+        body { max-width: 900px; margin: 0 auto; padding: 0 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        header { border-bottom: 3px solid #0066cc; margin-bottom: 2em; padding: 1em 0; }
+        header h1 { font-size: 2em; font-weight: normal; color: #0066cc; margin-bottom: 0.2em; }
+        header h1 a { color: inherit; text-decoration: none; }
+        .tagline { color: #666; font-size: 0.9em; }
+        nav { margin: 1em 0 2em; }
+        nav ul { list-style: none; }
+        nav li { display: inline-block; margin-right: 1em; }
+        nav a { color: #0066cc; text-decoration: none; font-weight: 500; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 1em 0; }
+        section { margin-bottom: 3em; }
+        h2 { font-size: 1.5em; color: #0066cc; border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-bottom: 1em; }
+        h3 { font-size: 1.25em; color: #333; margin: 1.5em 0 0.75em; }
+        p { margin-bottom: 1em; }
+        pre { background: #f8f8f8; border: 1px solid #ddd; border-radius: 3px; padding: 1em; overflow-x: auto; font-size: 0.9em; line-height: 1.4; margin: 1em 0; }
+        code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; background: #f8f8f8; padding: 0.2em 0.4em; border-radius: 3px; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        th, td { border: 1px solid #ddd; padding: 0.5em; text-align: left; }
+        th { background: #f8f8f8; font-weight: bold; }
+        tr:nth-child(even) { background: #fafafa; }
+        ul, ol { margin: 1em 0; padding-left: 2em; }
+        li { margin-bottom: 0.5em; }
+        .note { background: #e7f3ff; border-left: 4px solid #0066cc; padding: 1em; margin: 1em 0; }
+        .warning { background: #fff3e7; border-left: 4px solid #cc6600; padding: 1em; margin: 1em 0; }
+        .important { background: #ffe7e7; border-left: 4px solid #cc0000; padding: 1em; margin: 1em 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { border-top: 1px solid #eee; padding: 2em 0; margin-top: 3em; color: #666; font-size: 0.9em; }
+        @media (max-width: 768px) { body { padding: 0 15px; } nav li { display: block; margin-bottom: 0.5em; } }
+        @media print { nav, footer { display: none; } pre { background: transparent; border: none; } }
+        
+        /* Profile comparison table */
+        .profile-table th { text-align: center; }
+        .profile-table td { text-align: center; }
+        .check { color: #009900; font-weight: bold; }
+        .cross { color: #990000; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">NotLFS</a></h1>
+        <p class="tagline">Build Profiles</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="profiles.html">Build Profiles</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="community.html">Community</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>NotLFS Build Profiles</h2>
+            
+            <p>NotLFS comes with four pre-defined build profiles, each tailored for different use cases. You can also create your own custom profiles.</p>
+        </section>
+        
+        <section>
+            <h2>Profile Comparison</h2>
+            
+            <table class="profile-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Minimal</th>
+                        <th>Base</th>
+                        <th>Desktop</th>
+                        <th>Server</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Description</strong></td>
+                        <td>Absolute minimal</td>
+                        <td>Complete system</td>
+                        <td>Full desktop</td>
+                        <td>Server-oriented</td>
+                    </tr>
+                    <tr>
+                        <td>Default Init</td>
+                        <td>s6</td>
+                        <td>s6-rc</td>
+                        <td>s6-rc</td>
+                        <td>runit</td>
+                    </tr>
+                    <tr>
+                        <td>Build Time</td>
+                        <td>30-60 min</td>
+                        <td>2-4 hours</td>
+                        <td>6-12 hours</td>
+                        <td>3-6 hours</td>
+                    </tr>
+                    <tr>
+                        <td>Disk Space</td>
+                        <td>300-500 MB</td>
+                        <td>1.5-2.5 GB</td>
+                        <td>8-15 GB</td>
+                        <td>2-4 GB</td>
+                    </tr>
+                    <tr>
+                        <td>Core Packages</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Dev Tools</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Networking</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>GUI/Desktop</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="cross">✗</td>
+                    </tr>
+                    <tr>
+                        <td>Web Server</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Database</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Documentation</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="cross">✗</td>
+                    </tr>
+                    <tr>
+                        <td>Debug Symbols</td>
+                        <td class="cross">✗</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                        <td class="check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section>
+            <h2>Profile Details</h2>
+            
+            <h3 id="minimal">Minimal Profile</h3>
+            <p><strong>Use Case:</strong> Embedded systems, containers, rescue systems, custom builds with maximum control</p>
+            <p><strong>Features:</strong> Smallest possible NotLFS installation, fast build time, minimal disk footprint, security hardening enabled by default</p>
+            <p><strong>Packages:</strong> Core system, init system, essential utilities only</p>
+            <p><strong>Command:</strong> <code>./notlfs.sh -p minimal</code></p>
+            
+            <h3 id="base">Base Profile</h3>
+            <p><strong>Use Case:</strong> Development workstations, general-purpose servers, base for custom distributions</p>
+            <p><strong>Features:</strong> Complete Linux system, full development toolchain, networking support, version control systems, system monitoring tools</p>
+            <p><strong>Packages:</strong> All minimal packages + dev tools, networking, languages (Python, Perl, Ruby)</p>
+            <p><strong>Command:</strong> <code>./notlfs.sh -p base</code></p>
+            
+            <h3 id="desktop">Desktop Profile</h3>
+            <p><strong>Use Case:</strong> Desktop workstations, development machines with GUI, general-purpose desktop computers</p>
+            <p><strong>Features:</strong> Full KDE Plasma desktop, graphics stack (X11/Wayland), audio (PulseAudio/ALSA), video playback, Firefox browser, network management, Bluetooth</p>
+            <p><strong>Packages:</strong> All base packages + KDE Plasma, graphics, multimedia, productivity apps</p>
+            <p><strong>Command:</strong> <code>./notlfs.sh -p desktop -i systemd</code></p>
+            <div class="note">
+                <strong>Note:</strong> systemd is recommended for the best desktop experience, though s6-rc is the default.
+            </div>
+            
+            <h3 id="server">Server Profile</h3>
+            <p><strong>Use Case:</strong> Web servers, database servers, file servers, mail servers, cloud instances, production servers</p>
+            <p><strong>Features:</strong> Nginx web server, PostgreSQL database, Samba/NFS file servers, Postfix mail server, dnsmasq DNS, fail2ban security, iptables firewall, chrony time sync, cron</p>
+            <p><strong>Packages:</strong> All base packages + web server, database, file server, mail server, security tools</p>
+            <p><strong>Command:</strong> <code>./notlfs.sh -p server -i runit</code></p>
+        </section>
+        
+        <section>
+            <h2>Custom Profiles</h2>
+            
+            <p>You can create your own custom profiles by combining existing profiles or defining your own package sets.</p>
+            
+            <h3>Creating a Custom Profile</h3>
+            <p>Create a new directory in the <code>profiles/</code> directory with a <code>profile.xml</code> file:</p>
+            
+            <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;profile name="my-profile"&gt;
+    &lt;description&gt;My custom NotLFS profile&lt;/description&gt;
+    &lt;init_system&gt;s6-rc&lt;/init_system&gt;
+    &lt;packages&gt;
+        &lt;include profile="base" /&gt;
+        &lt;package name="nginx" enabled="true" /&gt;
+        &lt;package name="postgresql" enabled="true" /&gt;
+    &lt;/packages&gt;
+    &lt;features&gt;
+        &lt;feature name="server"&gt;true&lt;/feature&gt;
+    &lt;/features&gt;
+&lt;/profile&gt;</code></pre>
+            
+            <h3>Using a Custom Profile</h3>
+            <p>Use your custom profile with the <code>-p</code> option:</p>
+            <pre><code>$ ./notlfs.sh -p my-profile</code></pre>
+        </section>
+    </main>
+    
+    <footer>
+        <p>NotLFS Build Profiles | <a href="/">Home</a> | <a href="docs.html">Documentation</a></p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

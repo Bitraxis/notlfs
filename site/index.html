@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotLFS - Not Linux From Scratch</title>
+    <style>
+        /* ========================================================================
+           NotLFS Website Stylesheet
+           Simple, clean design inspired by LFS and OpenBSD
+           ======================================================================== */
+        
+        /* Reset and base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #000;
+            background: #fff;
+        }
+        
+        body {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        /* Header */
+        header {
+            border-bottom: 3px solid #0066cc;
+            margin-bottom: 2em;
+            padding: 1em 0;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            font-weight: normal;
+            color: #0066cc;
+            margin-bottom: 0.2em;
+        }
+        
+        header h1 a {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        .tagline {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        /* Navigation */
+        nav {
+            margin: 1em 0 2em;
+        }
+        
+        nav ul {
+            list-style: none;
+        }
+        
+        nav li {
+            display: inline-block;
+            margin-right: 1em;
+        }
+        
+        nav a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Main content */
+        main {
+            padding: 1em 0;
+        }
+        
+        section {
+            margin-bottom: 3em;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            color: #0066cc;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.3em;
+            margin-bottom: 1em;
+        }
+        
+        h3 {
+            font-size: 1.25em;
+            color: #333;
+            margin: 1.5em 0 0.75em;
+        }
+        
+        p {
+            margin-bottom: 1em;
+        }
+        
+        /* Code blocks */
+        pre {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 1em;
+            overflow-x: auto;
+            font-size: 0.9em;
+            line-height: 1.4;
+            margin: 1em 0;
+        }
+        
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            background: #f8f8f8;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        
+        /* Tables */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1em 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.5em;
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f8f8;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+        
+        li {
+            margin-bottom: 0.5em;
+        }
+        
+        /* Notes and warnings */
+        .note {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        
+        .warning {
+            background: #fff3e7;
+            border-left: 4px solid #cc6600;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        
+        .important {
+            background: #ffe7e7;
+            border-left: 4px solid #cc0000;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        
+        /* Links */
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        footer {
+            border-top: 1px solid #eee;
+            padding: 2em 0;
+            margin-top: 3em;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0 15px;
+            }
+            
+            nav li {
+                display: block;
+                margin-bottom: 0.5em;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            nav, footer {
+                display: none;
+            }
+            
+            pre {
+                background: transparent;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">NotLFS</a></h1>
+        <p class="tagline">Not Linux From Scratch - Build your own custom Linux distribution</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="profiles.html">Build Profiles</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="community.html">Community</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Welcome to NotLFS</h2>
+            
+            <p>NotLFS (Not Linux From Scratch) is a modular framework for building custom Linux systems from source code. Inspired by the classic <a href="https://www.linuxfromscratch.org/">Linux From Scratch</a> project, NotLFS adds modern features like multi-init system support, build profiles, and extensible package management.</p>
+            
+            <div class="note">
+                <strong>Note:</strong> NotLFS is a framework, not a distribution. You build your own custom Linux system using the NotLFS tools and package definitions.
+            </div>
+        </section>
+        
+        <section>
+            <h2>Features</h2>
+            
+            <ul>
+                <li><strong>Multi-Init System Support:</strong> s6, s6-rc, dinit, runit, sysv, systemd, openrc</li>
+                <li><strong>Modular Design:</strong> Build only what you need with customizable profiles</li>
+                <li><strong>Extensible:</strong> Add your own packages and configurations</li>
+                <li><strong>Build Modes:</strong> Auto (unattended), Interactive, Manual (step-by-step)</li>
+                <li><strong>Package Management:</strong> Add package managers post-install (xbps, nix, opkg, apk, custom)</li>
+                <li><strong>Smart Features:</strong> Dependency resolution, parallel builds, validation</li>
+                <li><strong>Custom Branding:</strong> Name your distribution whatever you want</li>
+            </ul>
+        </section>
+        
+        <section>
+            <h2>Quick Start</h2>
+            
+            <p>Get started with NotLFS in just a few commands:</p>
+            
+            <pre><code># Clone the NotLFS repository
+$ git clone https://github.com/Bitraxis/notlfs.git
+$ cd notlfs
+
+# Build a minimal system
+$ ./notlfs.sh -p minimal
+
+# Build with a specific init system
+$ ./notlfs.sh -p base -i s6-rc
+
+# Build a desktop system
+$ ./notlfs.sh -p desktop -i systemd</code></pre>
+            
+            <p>See the <a href="docs.html">documentation</a> for detailed instructions.</p>
+        </section>
+        
+        <section>
+            <h2>Latest News</h2>
+            
+            <div class="note">
+                <strong>2026-06-04:</strong> NotLFS 1.0 released with four build profiles: minimal, base, desktop (KDE Plasma), and server.
+            </div>
+            
+            <div class="note">
+                <strong>2026-06-01:</strong> Added support for s6-rc, dinit, and runit init systems.
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>NotLFS - Not Linux From Scratch | <a href="https://github.com/Bitraxis/notlfs">GitHub</a> | <a href="community.html">Community</a></p>
+        <p>This site is best viewed with any browser. No JavaScript required.</p>
+    </footer>
+    
+    <script>
+        // Simple JavaScript for NotLFS website
+        // Add minimal interactivity without requiring JS
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add current year to footer if needed
+            var yearSpan = document.querySelector('.current-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Add syntax highlighting to code blocks (simple version)
+            document.querySelectorAll('pre code').forEach(function(code) {
+                // This is a placeholder - real syntax highlighting would require a library
+                // But we keep it simple like LFS/OpenBSD
+            });
+        });
+    </script>
+</body>
+</html>

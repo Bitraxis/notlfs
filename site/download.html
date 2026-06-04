@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - NotLFS</title>
+    <style>
+        /* Same styles as index.html */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; line-height: 1.6; color: #000; background: #fff; }
+        body { max-width: 900px; margin: 0 auto; padding: 0 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        header { border-bottom: 3px solid #0066cc; margin-bottom: 2em; padding: 1em 0; }
+        header h1 { font-size: 2em; font-weight: normal; color: #0066cc; margin-bottom: 0.2em; }
+        header h1 a { color: inherit; text-decoration: none; }
+        .tagline { color: #666; font-size: 0.9em; }
+        nav { margin: 1em 0 2em; }
+        nav ul { list-style: none; }
+        nav li { display: inline-block; margin-right: 1em; }
+        nav a { color: #0066cc; text-decoration: none; font-weight: 500; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 1em 0; }
+        section { margin-bottom: 3em; }
+        h2 { font-size: 1.5em; color: #0066cc; border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-bottom: 1em; }
+        h3 { font-size: 1.25em; color: #333; margin: 1.5em 0 0.75em; }
+        p { margin-bottom: 1em; }
+        pre { background: #f8f8f8; border: 1px solid #ddd; border-radius: 3px; padding: 1em; overflow-x: auto; font-size: 0.9em; line-height: 1.4; margin: 1em 0; }
+        code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; background: #f8f8f8; padding: 0.2em 0.4em; border-radius: 3px; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        th, td { border: 1px solid #ddd; padding: 0.5em; text-align: left; }
+        th { background: #f8f8f8; font-weight: bold; }
+        tr:nth-child(even) { background: #fafafa; }
+        ul, ol { margin: 1em 0; padding-left: 2em; }
+        li { margin-bottom: 0.5em; }
+        .note { background: #e7f3ff; border-left: 4px solid #0066cc; padding: 1em; margin: 1em 0; }
+        .warning { background: #fff3e7; border-left: 4px solid #cc6600; padding: 1em; margin: 1em 0; }
+        .important { background: #ffe7e7; border-left: 4px solid #cc0000; padding: 1em; margin: 1em 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        footer { border-top: 1px solid #eee; padding: 2em 0; margin-top: 3em; color: #666; font-size: 0.9em; }
+        @media (max-width: 768px) { body { padding: 0 15px; } nav li { display: block; margin-bottom: 0.5em; } }
+        @media print { nav, footer { display: none; } pre { background: transparent; border: none; } }
+        
+        /* Download page specific styles */
+        .download-box {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1.5em;
+            margin: 1em 0;
+        }
+        .download-box h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .download-link {
+            display: block;
+            background: #0066cc;
+            color: #fff;
+            padding: 0.5em 1em;
+            border-radius: 3px;
+            text-decoration: none;
+            margin: 0.5em 0;
+            font-weight: bold;
+        }
+        .download-link:hover {
+            background: #0055aa;
+        }
+        .version { color: #666; font-size: 0.9em; }
+        .date { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">NotLFS</a></h1>
+        <p class="tagline">Download</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="docs.html">Documentation</a></li>
+            <li><a href="profiles.html">Build Profiles</a></li>
+            <li><a href="download.html">Download</a></li>
+            <li><a href="community.html">Community</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section>
+            <h2>Download NotLFS</h2>
+            
+            <p>NotLFS is a framework, not a pre-built distribution. You build your own system from source using the NotLFS tools. However, you can download the NotLFS framework itself to get started.</p>
+        </section>
+        
+        <section>
+            <h2>Latest Release</h2>
+            
+            <div class="download-box">
+                <h3>NotLFS 1.0.0</h3>
+                <p class="version">Version: 1.0.0</p>
+                <p class="date">Released: June 4, 2026</p>
+                <p>The first stable release of NotLFS with support for multiple init systems and build profiles.</p>
+                <a href="https://github.com/Bitraxis/notlfs/archive/refs/tags/Release.zip" class="download-link">Download NotLFS 1.0.0 (zip)</a>
+                <a href="https://github.com/Bitraxis/notlfs/archive/refs/tags/Release.tar.gz" class="download-link">Download NotLFS 1.0.0 (tar.gz)</a>
+            </div>
+            
+            <h3>Release Notes</h3>
+            <ul>
+                <li>Added four build profiles: minimal, base, desktop, server</li>
+                <li>Support for 8 init systems: s6, s6-rc, s6-init, dinit, runit, sysv, systemd, openrc</li>
+                <li>Package manager adder tool for post-install package management</li>
+                <li>Distro name changer for custom branding</li>
+                <li>Improved documentation and build process</li>
+            </ul>
+        </section>
+        
+        <section>
+            <h2>Development Version</h2>
+            
+            <div class="download-box">
+                <h3>NotLFS (Development)</h3>
+                <p class="version">Version: rolling</p>
+                <p class="date">Updated: continuously</p>
+                <p>The latest development version with all the newest features. May contain bugs.</p>
+                <a href="https://github.com/Bitraxis/notlfs" class="download-link">View on GitHub</a>
+                <pre><code># Clone the repository
+$ git clone https://github.com/Bitraxis/notlfs.git</code></pre>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Source Code</h2>
+            
+            <p>The NotLFS source code is hosted on GitHub:</p>
+            
+            <div class="download-box">
+                <h3>GitHub Repository</h3>
+                <p><a href="https://github.com/Bitraxis/notlfs">https://github.com/Bitraxis/notlfs</a></p>
+                <pre><code># Clone the repository
+$ git clone https://github.com/Bitraxis/notlfs.git
+
+# Or with SSH
+$ git clone git@github.com:Bitraxis/notlfs.git</code></pre>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Mirror Sites</h2>
+            
+            <p>NotLFS is also available from the following mirrors:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mirror</th>
+                        <th>Location</th>
+                        <th>Protocol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="https://github.com/Bitraxis/notlfs">GitHub</a></td>
+                        <td>Global</td>
+                        <td>HTTPS, Git, SSH</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    
+    <footer>
+        <p>NotLFS Download | <a href="/">Home</a> | <a href="https://github.com/Bitraxis/notlfs">GitHub</a></p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
