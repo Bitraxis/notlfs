@@ -673,7 +673,7 @@ if ($thread_id && $action !== 'reply') {
                 echo "    <p class='thread-meta'>$thread_count threads</p>\n";
                 echo "</div>\n";
             }
-        
+        endif;
         ?>
     </main>
     

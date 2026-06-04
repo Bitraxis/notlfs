@@ -449,7 +449,7 @@ if ($action === 'delete' && is_logged_in()) {
                 echo markdown($page_data['content']);
                 echo "</div>\n";
             }
-        
+        endif;
         ?>
     </main>
     
