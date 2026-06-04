@@ -1,0 +1,9 @@
+<distro>
+    <name>MyLinux</name>
+    <version>1.0</version>
+    <id>mylinux</id>
+    <pretty_name>MyLinux 1.0</pretty_name>
+    <description>My custom Linux distribution</description>
+    <homepage>https://mylinux.example.com</homepage>
+    <bug_report_url>https://bugs.mylinux.example.com</bug_report_url>
+</distro>

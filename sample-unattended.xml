@@ -1,0 +1,26 @@
+<!-- Select init system -->
+<init_system>s6-rc</init_system>
+
+<!-- Enable packages by category -->
+<category name="core" enabled="true"/>
+<category name="init" enabled="true"/>
+<category name="network" enabled="true"/>
+
+<!-- Or individual packages -->
+<package name="vim" enabled="true"/>
+<package name="git" enabled="true"/>
+
+<!-- Services to enable -->
+<service name="sshd" enabled="true" runlevel="default"/>
+
+<!-- Security hardening -->
+<security>
+    <enable_hardening>true</enable_hardening>
+    <stack_protector>true</stack_protector>
+    <fortify_source>true</fortify_source>
+</security>
+
+<!-- Custom hooks -->
+<hook stage="post-install">
+    echo "System built at $(date)"
+</hook>
