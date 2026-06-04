@@ -1,0 +1,67 @@
+# Package: glibc
+# Description: GNU C Library
+# Maintainer: NotLFS Team
+# Version: 2.39
+
+NAME="glibc"
+VERSION="2.39"
+SOURCE="https://ftp.gnu.org/gnu/glibc/glibc-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:592841681255111542410729388654731853771918922002379952785653352"
+DESCRIPTION="GNU C Library - The standard C library for Linux systems"
+HOMEPAGE="https://www.gnu.org/software/libc/"
+LICENSE="LGPL-2.1"
+
+DEPENDENCIES="linux-headers"
+BUILD_DEPENDENCIES="gcc binutils linux-headers make bash"
+PATCHES=""
+
+BUILD_DIR="glibc-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-profile --enable-kernel=4.19 --enable-obsolete-rpc --enable-sanity-checks --disable-werror"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing glibc ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring glibc ${VERSION}"
+    cd "${BUILD_DIR}"
+    mkdir -p "../glibc-build"
+    cd "../glibc-build"
+    "${BUILD_DIR}/configure" ${CONFIG_OPTIONS} --with-headers=${LFS}/usr/include --build=${LFS_ARCH}-linux-gnu --host=${LFS_ARCH}-linux-gnu
+    return 0
+}
+
+build() {
+    log_info "Building glibc ${VERSION}"
+    cd "../glibc-build"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+
+install() {
+    log_info "Installing glibc to ${LFS}"
+    cd "../glibc-build"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} localedata/install-locales
+    return 0
+}
+
+post_install() {
+    log_info "glibc ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc"
+    cat > "${LFS}/etc/nsswitch.conf" << 'EOF'
+passwd: files
+shadow: files
+group: files
+hosts: files dns
+networks: files
+protocols: files
+services: files
+ethers: files
+rpc: files
+EOF
+    ln -sfv /usr/share/zoneinfo/UTC "${LFS}/etc/localtime" 2>/dev/null || true
+    echo "UTC" > "${LFS}/etc/timezone" 2>/dev/null || true
+}

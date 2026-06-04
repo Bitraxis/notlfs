@@ -1,0 +1,35 @@
+# Package: cronie
+# Description: Cronie Cron Daemon
+# Maintainer: NotLFS Team
+# Version: 1.6.1
+
+NAME="cronie"
+VERSION="1.6.1"
+SOURCE="https://github.com/cronie-crond/cronie/releases/download/cronie-${VERSION}/cronie-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_cronie_hash"
+DESCRIPTION="Cronie - Cron daemon for task scheduling"
+HOMEPAGE="https://github.com/cronie-crond/cronie"
+LICENSE="BSD-3-Clause"
+
+DEPENDENCIES="glibc pam"
+BUILD_DEPENDENCIES="gcc make glibc pam"
+PATCHES=""
+
+BUILD_DIR="cronie-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "cronie ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/cron.d"
+    mkdir -p "${LFS}/etc/cron.hourly"
+    mkdir -p "${LFS}/etc/cron.daily"
+    mkdir -p "${LFS}/etc/cron.weekly"
+    mkdir -p "${LFS}/etc/cron.monthly"
+    mkdir -p "${LFS}/var/spool/cron"
+    return 0
+}

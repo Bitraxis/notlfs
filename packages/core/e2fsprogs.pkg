@@ -1,0 +1,43 @@
+# Package: e2fsprogs
+# Description: E2fsprogs
+# Maintainer: NotLFS Team
+# Version: 1.47.0
+
+NAME="e2fsprogs"
+VERSION="1.47.0"
+SOURCE="https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v${VERSION}/e2fsprogs-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:60b888488435315695463481e5433833521317402126000834982841071296"
+DESCRIPTION="E2fsprogs - Ext2/3/4 filesystem utilities"
+HOMEPAGE="https://e2fsprogs.sourceforge.io/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc util-linux"
+BUILD_DEPENDENCIES="gcc make glibc util-linux"
+PATCHES=""
+
+BUILD_DIR="e2fsprogs-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --bindir=/bin --sbindir=/sbin --enable-elf-shlibs --disable-libuuid --disable-uuid --disable-fsck --disable-libblkid"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    sed -i 's|-O2 -g|-O2|' MCONFIG 2>/dev/null || true
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install-libs
+    chmod -v u+w "${LFS}/usr/lib/{libcom_err,libe2p,libext2fs,libss}.a" 2>/dev/null || true
+    return 0
+}
+post_install() {
+    log_info "e2fsprogs ${VERSION} installed successfully"
+    ln -sfv /sbin/mke2fs "${LFS}/sbin/mkfs.ext2"
+    ln -sfv /sbin/mke2fs "${LFS}/sbin/mkfs.ext3"
+    ln -sfv /sbin/mke2fs "${LFS}/sbin/mkfs.ext4"
+    ln -sfv /sbin/fsck.ext2 "${LFS}/sbin/fsck.ext3"
+    ln -sfv /sbin/fsck.ext2 "${LFS}/sbin/fsck.ext4"
+    return 0
+}

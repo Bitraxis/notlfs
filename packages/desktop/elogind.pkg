@@ -1,0 +1,45 @@
+# Package: elogind
+# Description: elogind
+# Maintainer: NotLFS Team
+# Version: 256.3
+
+NAME="elogind"
+VERSION="256.3"
+SOURCE="https://github.com/elogind/elogind/archive/refs/tags/v${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_elogind_hash"
+DESCRIPTION="elogind - System and session management"
+HOMEPAGE="https://github.com/elogind/elogind"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc dbus pam"
+BUILD_DEPENDENCIES="gcc make glibc meson dbus pam pkgconf"
+PATCHES=""
+
+BUILD_DIR="elogind-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() {
+    log_info "elogind ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/elogind"
+    return 0
+}

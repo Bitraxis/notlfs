@@ -1,0 +1,32 @@
+# Package: gawk
+# Description: GNU Awk
+# Maintainer: NotLFS Team
+# Version: 5.3.0
+
+NAME="gawk"
+VERSION="5.3.0"
+SOURCE="https://ftp.gnu.org/gnu/gawk/gawk-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:99447739348771244769443915f77a763431796299210a913f18713f392655"
+DESCRIPTION="GNU Awk - Pattern scanning and processing language"
+HOMEPAGE="https://www.gnu.org/software/gawk/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="gawk-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mv -v "${LFS}/usr/bin/gawk" "${LFS}/bin/awk"
+    ln -sfv awk "${LFS}/usr/bin/gawk"
+    return 0
+}
+post_install() { log_info "gawk ${VERSION} installed successfully"; return 0; }

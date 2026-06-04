@@ -1,0 +1,26 @@
+# Package: alsa-utils
+# Description: ALSA Utilities
+# Maintainer: NotLFS Team
+# Version: 1.2.12
+
+NAME="alsa-utils"
+VERSION="1.2.12"
+SOURCE="https://www.alsa-project.org/files/pub/utils/alsa-utils-${VERSION}.tar.bz2"
+SOURCE_HASH="sha256:placeholder_alsa_utils_hash"
+DESCRIPTION="ALSA Utilities - Command-line utilities for ALSA"
+HOMEPAGE="https://www.alsa-project.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc alsa-lib ncurses"
+BUILD_DEPENDENCIES="gcc make glibc alsa-lib ncurses"
+PATCHES=""
+
+BUILD_DIR="alsa-utils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --with-curses=ncurses"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "alsa-utils ${VERSION} installed successfully"; return 0; }

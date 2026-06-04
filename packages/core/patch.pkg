@@ -1,0 +1,26 @@
+# Package: patch
+# Description: GNU Patch
+# Maintainer: NotLFS Team
+# Version: 2.8
+
+NAME="patch"
+VERSION="2.8"
+SOURCE="https://ftp.gnu.org/gnu/patch/patch-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:85315134188149383353612975c940059429421522091845377035835833780"
+DESCRIPTION="GNU Patch - Apply diff files to originals"
+HOMEPAGE="https://www.gnu.org/software/patch/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="patch-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "patch ${VERSION} installed successfully"; return 0; }

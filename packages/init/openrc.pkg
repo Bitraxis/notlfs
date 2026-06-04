@@ -1,0 +1,39 @@
+# Package: openrc
+# Description: OpenRC init system
+# Maintainer: NotLFS Team
+# Version: 0.49
+
+NAME="openrc"
+VERSION="0.49"
+SOURCE="https://github.com/OpenRC/openrc/archive/refs/tags/${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_openrc_hash"
+DESCRIPTION="OpenRC - Dependency-based init system"
+HOMEPAGE="https://github.com/OpenRC/openrc"
+LICENSE="BSD-2-Clause"
+
+DEPENDENCIES="glibc bash"
+BUILD_DEPENDENCIES="gcc make glibc bash"
+PATCHES=""
+
+BUILD_DIR="openrc-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/run --sbindir=/sbin"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    ./configure ${CONFIG_OPTIONS}
+    return 0
+}
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    ln -sf "${LFS}/sbin/openrc-init" "${LFS}/sbin/init" 2>/dev/null || true
+    return 0
+}
+post_install() {
+    log_info "openrc ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/rc.d" "${LFS}/etc/conf.d" "${LFS}/etc/init.d" "${LFS}/run/openrc"
+    return 0
+}

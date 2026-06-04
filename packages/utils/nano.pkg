@@ -1,0 +1,32 @@
+# Package: nano
+# Description: GNU Nano
+# Maintainer: NotLFS Team
+# Version: 8.1
+
+NAME="nano"
+VERSION="8.1"
+SOURCE="https://www.nano-editor.org/dist/v8/nano-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:005b933279685925351639585683935d1469934a5043646133251061754706"
+DESCRIPTION="GNU Nano - A small, friendly text editor"
+HOMEPAGE="https://www.nano-editor.org/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc ncurses"
+BUILD_DEPENDENCIES="gcc make glibc ncurses"
+PATCHES=""
+
+BUILD_DIR="nano-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --enable-utf8 --disable-libmagic --disable-speller"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "nano ${VERSION} installed successfully"
+    cat > "${LFS}/etc/nanorc" << 'EOF'
+include "/usr/share/nano/*.nanorc"
+EOF
+    return 0
+}

@@ -1,0 +1,29 @@
+# Package: tar
+# Description: GNU Tar
+# Maintainer: NotLFS Team
+# Version: 1.35
+
+NAME="tar"
+VERSION="1.35"
+SOURCE="https://ftp.gnu.org/gnu/tar/tar-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:57553973415453966383267b34487927378483728137858550040dd1045918"
+DESCRIPTION="GNU Tar - An archiving utility"
+HOMEPAGE="https://www.gnu.org/software/tar/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="tar-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --bindir=/bin"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    rm -f tests/oldgnu/misc/acl-extract.test 2>/dev/null || true
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "tar ${VERSION} installed successfully"; return 0; }

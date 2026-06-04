@@ -1,0 +1,26 @@
+# Package: htop
+# Description: htop - Interactive process viewer
+# Maintainer: NotLFS Team
+# Version: 3.3.0
+
+NAME="htop"
+VERSION="3.3.0"
+SOURCE="https://github.com/htop-dev/htop/releases/download/${VERSION}/htop-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:98274988248e792c3952877897759353159d154613571873375412898300"
+DESCRIPTION="htop - An interactive process viewer for Linux"
+HOMEPAGE="https://htop.dev/"
+LICENSE="BSD-3-Clause"
+
+DEPENDENCIES="glibc ncurses"
+BUILD_DEPENDENCIES="gcc make glibc ncurses autoconf automake"
+PATCHES=""
+
+BUILD_DIR="htop-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "htop ${VERSION} installed successfully"; return 0; }

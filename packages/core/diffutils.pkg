@@ -1,0 +1,26 @@
+# Package: diffutils
+# Description: GNU Diff Utilities
+# Maintainer: NotLFS Team
+# Version: 3.10
+
+NAME="diffutils"
+VERSION="3.10"
+SOURCE="https://ftp.gnu.org/gnu/diffutils/diffutils-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:99771643a574e73852035868615543661155856254e573493890a762282e968"
+DESCRIPTION="GNU Diff Utilities - Tools for comparing files and directories"
+HOMEPAGE="https://www.gnu.org/software/diffutils/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="diffutils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "diffutils ${VERSION} installed successfully"; return 0; }

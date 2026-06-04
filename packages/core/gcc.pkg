@@ -1,0 +1,54 @@
+# Package: gcc
+# Description: GNU Compiler Collection
+# Maintainer: NotLFS Team
+# Version: 14.2.0
+
+NAME="gcc"
+VERSION="14.2.0"
+SOURCE="https://ftp.gnu.org/gnu/gcc/gcc-${VERSION}/gcc-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:2870617b91f98844d65767936073fa3336535f59848f4d345593d349d804211"
+DESCRIPTION="GNU Compiler Collection - C and C++ compiler"
+HOMEPAGE="https://gcc.gnu.org/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="binutils glibc linux-headers"
+BUILD_DEPENDENCIES="binutils glibc linux-headers make bash gawk"
+PATCHES=""
+
+BUILD_DIR="gcc-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --enable-languages=c,c++ --disable-multilib --disable-bootstrap --with-sysroot=${LFS} --with-newlib"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build gcc ${VERSION}"
+    cd "${BUILD_DIR}"
+    ./contrib/download_prerequisites
+}
+
+configure() {
+    log_info "Configuring gcc ${VERSION}"
+    cd "${BUILD_DIR}"
+    mkdir -p "../gcc-build"
+    cd "../gcc-build"
+    "${BUILD_DIR}/configure" ${CONFIG_OPTIONS} --with-glibc-version=2.39 --enable-default-pie --enable-default-ssp --disable-nls --disable-libatomic --disable-libgomp --disable-libquadmath --disable-libssp --disable-libvtv --disable-libmudflap --with-headers=${LFS}/usr/include --with-libc=${LFS}/usr/lib/libc.so.6
+    return 0
+}
+
+build() {
+    log_info "Building gcc ${VERSION}"
+    cd "../gcc-build"
+    make ${MAKE_OPTIONS} all-gcc all-target-libgcc
+    return 0
+}
+
+install() {
+    log_info "Installing gcc to ${LFS}"
+    cd "../gcc-build"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install-gcc install-target-libgcc
+    return 0
+}
+
+post_install() {
+    log_info "gcc ${VERSION} installed successfully"
+    ln -sfv gcc "${LFS}/usr/bin/cc" 2>/dev/null || true
+}

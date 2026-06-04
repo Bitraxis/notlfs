@@ -1,0 +1,55 @@
+# Package: coreutils
+# Description: GNU Core Utilities
+# Maintainer: NotLFS Team
+# Version: 9.5
+
+NAME="coreutils"
+VERSION="9.5"
+SOURCE="https://ftp.gnu.org/gnu/coreutils/coreutils-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:4c333eb411ab2814124b554d562c27734163630956d6331e4133c430595b892b"
+DESCRIPTION="GNU Core Utilities - Basic file, shell and text manipulation utilities"
+HOMEPAGE="https://www.gnu.org/software/coreutils/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="coreutils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --enable-no-install-program=kill,uptime --enable-multicall"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing coreutils ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring coreutils ${VERSION}"
+    cd "${BUILD_DIR}"
+    export gl_cv_func_working_mkstemp=yes
+    export gl_cv_func_working_utimes=yes
+    "./configure" ${CONFIG_OPTIONS}
+    return 0
+}
+
+build() {
+    log_info "Building coreutils ${VERSION}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+
+install() {
+    log_info "Installing coreutils to ${LFS}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mv -v "${LFS}/usr/bin/{"cat,chgrp,chmod,chown,cp,date,dd,df,echo,false,ln,ls,mkdir,mknod,mv,pwd,rm,rmdir,stty,sync,true,uname"} "${LFS}/bin"
+    mv -v "${LFS}/usr/bin/chroot" "${LFS}/usr/sbin/"
+    return 0
+}
+
+post_install() {
+    log_info "coreutils ${VERSION} installed successfully"
+    ln -sfv ../../bin/test "${LFS}/usr/bin/["
+}

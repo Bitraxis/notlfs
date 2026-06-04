@@ -1,0 +1,52 @@
+# Package: binutils
+# Description: GNU Binary Utilities
+# Maintainer: NotLFS Team
+# Version: 2.42
+
+NAME="binutils"
+VERSION="2.42"
+SOURCE="https://ftp.gnu.org/gnu/binutils/binutils-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:580878932890291812770126546208712438543535233747585959118611102"
+DESCRIPTION="GNU Binary Utilities - assembler, linker, and other binary tools"
+HOMEPAGE="https://www.gnu.org/software/binutils/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES=""
+BUILD_DEPENDENCIES="gcc make bash"
+PATCHES=""
+
+BUILD_DIR="binutils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --enable-shared --enable-64-bit-bfd --enable-gold --enable-ld=default --enable-plugins --disable-werror"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build binutils ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring binutils ${VERSION}"
+    cd "${BUILD_DIR}"
+    mkdir -p "../binutils-build"
+    cd "../binutils-build"
+    "${BUILD_DIR}/configure" ${CONFIG_OPTIONS} --with-sysroot=${LFS} --with-lib-path=${LFS}/usr/lib
+    return 0
+}
+
+build() {
+    log_info "Building binutils ${VERSION}"
+    cd "../binutils-build"
+    make ${MAKE_OPTIONS} tooldir=/usr
+    return 0
+}
+
+install() {
+    log_info "Installing binutils to ${LFS}"
+    cd "../binutils-build"
+    make ${MAKE_OPTIONS} tooldir=/usr DESTDIR=${LFS} install
+    return 0
+}
+
+post_install() {
+    log_info "binutils ${VERSION} installed successfully"
+}

@@ -1,0 +1,36 @@
+# Package: redis
+# Description: Redis Key-Value Store
+# Maintainer: NotLFS Team
+# Version: 7.2.4
+
+NAME="redis"
+VERSION="7.2.4"
+SOURCE="https://download.redis.io/releases/redis-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_redis_hash"
+DESCRIPTION="Redis - In-memory data structure store"
+HOMEPAGE="https://redis.io/"
+LICENSE="BSD-3-Clause"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="redis-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; make distclean 2>/dev/null || true; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} PREFIX=${LFS}/usr DESTDIR=${LFS} install
+    return 0
+}
+post_install() {
+    log_info "redis ${VERSION} installed successfully"
+    mkdir -p "${LFS}/var/lib/redis"
+    mkdir -p "${LFS}/var/log/redis"
+    mkdir -p "${LFS}/run/redis"
+    return 0
+}

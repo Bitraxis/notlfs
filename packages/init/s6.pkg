@@ -1,0 +1,84 @@
+# Package: s6
+# Description: s6 supervision suite
+# Maintainer: NotLFS Team
+# Version: 2.11.3.0
+
+NAME="s6"
+VERSION="2.11.3.0"
+SOURCE="https://skarnet.org/software/s6/s6-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:d47d35c1f684b929f990d9099273e2094f7532f6d430639947006a64e9d8c166"
+DESCRIPTION="s6 supervision suite - minimalist service manager"
+HOMEPAGE="https://skarnet.org/software/s6/"
+LICENSE="ISC"
+
+DEPENDENCIES="skalibs execline"
+BUILD_DEPENDENCIES="gcc make skalibs execline"
+PATCHES=""
+
+BUILD_DIR="s6-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build s6 ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring s6 (custom build system)"
+    cd "${BUILD_DIR}"
+    cat > "compile" << 'EOF'
+#!/bin/sh
+cc -O2 -static -o "$1" "$2"
+EOF
+    chmod +x compile
+    return 0
+}
+
+build() {
+    log_info "Building s6"
+    cd "${BUILD_DIR}"
+    ./compile package
+    ./compile libs
+    return 0
+}
+
+install() {
+    log_info "Installing s6 to ${LFS}"
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/s6"
+    mkdir -p "${LFS}/usr/share/man/man1" "${LFS}/usr/share/man/man7"
+    
+    for dir in bin command; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/bin/"
+            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+        fi
+    done
+    
+    for dir in include lib libexec; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/usr/lib/s6/"
+        fi
+    done
+    
+    for dir in doc/*/; do
+        local man_section=$(basename "$dir")
+        if [ "$man_section" = "man1" ] || [ "$man_section" = "man7" ]; then
+            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+            cp -a "$dir"*.7 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+        fi
+    done
+    
+    for cmd in s6-svscan s6-svscanctl s6-supervise s6-svok; do
+        ln -sf "${LFS}/usr/lib/s6/exexe/${cmd}" "${LFS}/bin/${cmd}" 2>/dev/null || true
+    done
+    
+    return 0
+}
+
+post_install() {
+    log_info "s6 ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/s6" "${LFS}/etc/s6/current"
+    return 0
+}

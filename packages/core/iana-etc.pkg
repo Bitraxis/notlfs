@@ -1,0 +1,32 @@
+# Package: iana-etc
+# Description: IANA etc files
+# Maintainer: NotLFS Team
+# Version: 20240726
+
+NAME="iana-etc"
+VERSION="20240726"
+SOURCE="https://github.com/Mic92/iana-etc/releases/download/${VERSION}/iana-etc-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:410534125d091718411249856981100b4875432168541803458365093593462"
+DESCRIPTION="IANA etc files - /etc/protocols and /etc/services"
+HOMEPAGE="https://github.com/Mic92/iana-etc"
+LICENSE="Public Domain"
+
+DEPENDENCIES=""
+BUILD_DEPENDENCIES=""
+PATCHES=""
+
+BUILD_DIR="iana-etc-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS=""
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { return 0; }
+build() { return 0; }
+install() {
+    log_info "Installing iana-etc to ${LFS}"
+    cd "${BUILD_DIR}"
+    cp -v protocols "${LFS}/etc/protocols"
+    cp -v services "${LFS}/etc/services"
+    return 0
+}
+post_install() { log_info "iana-etc ${VERSION} installed successfully"; return 0; }

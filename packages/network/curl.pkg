@@ -1,0 +1,35 @@
+# Package: curl
+# Description: cURL - URL transfer library
+# Maintainer: NotLFS Team
+# Version: 8.7.1
+
+NAME="curl"
+VERSION="8.7.1"
+SOURCE="https://curl.se/download/curl-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:9657543b916342238a83371475135705d36759545312a851463d68653898"
+DESCRIPTION="cURL - A command line tool for transferring data with URL syntax"
+HOMEPAGE="https://curl.se/"
+LICENSE="curl"
+
+DEPENDENCIES="glibc openssl zlib"
+BUILD_DEPENDENCIES="gcc make glibc openssl zlib"
+PATCHES=""
+
+BUILD_DIR="curl-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-static --enable-shared --disable-manual --enable-ipv6 --with-openssl"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    "./configure" ${CONFIG_OPTIONS} --with-ca-path=/etc/ssl/certs/ca-certificates.crt
+    return 0
+}
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mkdir -p "${LFS}/etc/ssl/certs"
+    return 0
+}
+post_install() { log_info "curl ${VERSION} installed successfully"; return 0; }

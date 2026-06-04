@@ -1,0 +1,35 @@
+# Package: sysstat
+# Description: Sysstat System Monitoring
+# Maintainer: NotLFS Team
+# Version: 12.7.5
+
+NAME="sysstat"
+VERSION="12.7.5"
+SOURCE="https://github.com/sysstat/sysstat/archive/refs/tags/v${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_sysstat_hash"
+DESCRIPTION="Sysstat - System performance monitoring tools (sar, iostat, etc.)"
+HOMEPAGE="https://github.com/sysstat/sysstat"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="sysstat-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    ./configure ${CONFIG_OPTIONS}
+    return 0
+}
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "sysstat ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/sysconfig"
+    mkdir -p "${LFS}/var/lib/sa"
+    return 0
+}

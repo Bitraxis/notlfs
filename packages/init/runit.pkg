@@ -1,0 +1,71 @@
+# Package: runit
+# Description: runit service supervisor
+# Maintainer: NotLFS Team
+# Version: 2.1.2
+
+NAME="runit"
+VERSION="2.1.2"
+SOURCE="http://smarden.org/runit/runit-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_runit_hash"
+DESCRIPTION="runit - UNIX service supervisor with process supervision"
+HOMEPAGE="http://smarden.org/runit/"
+LICENSE="BSD-3-Clause"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="admin-runit-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build runit ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring runit"
+    cd "${BUILD_DIR}"
+    # runit uses a simple build system
+    for i in src/*/compile; do
+        (cd "$(dirname "$i")" && ./compile) || true
+    done
+    return 0
+}
+
+build() {
+    log_info "Building runit"
+    cd "${BUILD_DIR}"
+    # Build all commands
+    for i in src/*/compile; do
+        (cd "$(dirname "$i")" && ./compile) || true
+    done
+    return 0
+}
+
+install() {
+    log_info "Installing runit to ${LFS}"
+    cd "${BUILD_DIR}"
+    
+    # Install binaries
+    mkdir -p "${LFS}/usr/bin" "${LFS}/usr/sbin"
+    for i in src/*; do
+        local cmd=$(basename "$i")
+        if [ -f "$i/$cmd" ]; then
+            cp -a "$i/$cmd" "${LFS}/usr/bin/${cmd}"
+            chmod 755 "${LFS}/usr/bin/${cmd}"
+        fi
+    done
+    
+    # Create symlink for init
+    ln -sf "${LFS}/usr/bin/runit-init" "${LFS}/sbin/init" 2>/dev/null || true
+    
+    return 0
+}
+
+post_install() {
+    log_info "runit ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/sv" "${LFS}/var/service"
+    return 0
+}

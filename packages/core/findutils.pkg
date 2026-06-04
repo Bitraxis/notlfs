@@ -1,0 +1,39 @@
+# Package: findutils
+# Description: GNU Find Utilities
+# Maintainer: NotLFS Team
+# Version: 4.10.0
+
+NAME="findutils"
+VERSION="4.10.0"
+SOURCE="https://ftp.gnu.org/gnu/findutils/findutils-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:585313716107550430573433581435c3493749843478888720483e552584172"
+DESCRIPTION="GNU Find Utilities - Tools for finding files in directory hierarchies"
+HOMEPAGE="https://www.gnu.org/software/findutils/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="findutils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --localstatedir=/var/lib/locate"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mv -v "${LFS}/usr/bin/find" "${LFS}/bin/"
+    return 0
+}
+post_install() {
+    log_info "findutils ${VERSION} installed successfully"
+    cat > "${LFS}/etc/updatedb.conf" << 'EOF'
+PRUNE_BIND_MOUNTS="yes"
+PRUNENAMES=".git .svn .hg"
+PRUNEPATHS="/tmp /var/spool /media /home"
+EOF
+    return 0;
+}

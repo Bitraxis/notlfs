@@ -1,0 +1,45 @@
+# Package: udisks2
+# Description: UDisks Storage Management
+# Maintainer: NotLFS Team
+# Version: 2.10.1
+
+NAME="udisks2"
+VERSION="2.10.1"
+SOURCE="https://github.com/storaged-project/udisks/releases/download/udisks-${VERSION}/udisks-${VERSION}.tar.bz2"
+SOURCE_HASH="sha256:placeholder_udisks2_hash"
+DESCRIPTION="UDisks - Storage device management"
+HOMEPAGE="https://storaged.org/udisks2/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc dbus glib polkit"
+BUILD_DEPENDENCIES="gcc make glibc meson dbus glib polkit pkgconf"
+PATCHES=""
+
+BUILD_DIR="udisks-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() {
+    log_info "udisks2 ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/udisks2"
+    return 0
+}

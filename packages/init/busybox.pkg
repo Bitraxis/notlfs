@@ -1,0 +1,60 @@
+# Package: busybox
+# Description: BusyBox - The Swiss Army Knife of Embedded Linux
+# Maintainer: NotLFS Team
+# Version: 1.36.1
+
+NAME="busybox"
+VERSION="1.36.1"
+SOURCE="https://busybox.net/downloads/busybox-${VERSION}.tar.bz2"
+SOURCE_HASH="sha256:placeholder_busybox_hash"
+DESCRIPTION="BusyBox - Multi-call binary with many common Unix utilities"
+HOMEPAGE="https://www.busybox.net/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="busybox-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build busybox ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring busybox"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} defconfig
+    # Enable common applets
+    sed -i 's/^# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
+    sed -i 's/^# CONFIG_BUSYBOX is not set/CONFIG_BUSYBOX=y/' .config
+    return 0
+}
+
+build() {
+    log_info "Building busybox"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+
+install() {
+    log_info "Installing busybox to ${LFS}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    return 0
+}
+
+post_install() {
+    log_info "busybox ${VERSION} installed successfully"
+    # Create symlinks for all applets
+    mkdir -p "${LFS}/bin"
+    cd "${LFS}/bin"
+    for applet in $(cat "${BUILD_DIR}/applets" 2>/dev/null || echo "sh cat cp echo ls mkdir mv rm"); do
+        ln -sf busybox "${applet}" 2>/dev/null || true
+    done
+    return 0
+}

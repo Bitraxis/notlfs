@@ -1,0 +1,31 @@
+# Package: pam
+# Description: Pluggable Authentication Modules
+# Maintainer: NotLFS Team
+# Version: 1.5.3
+
+NAME="pam"
+VERSION="1.5.3"
+SOURCE="https://github.com/linux-pam/linux-pam/releases/download/v${VERSION}/Linux-PAM-${VERSION}.tar.bz2"
+SOURCE_HASH="sha256:placeholder_pam_hash"
+DESCRIPTION="Pluggable Authentication Modules library"
+HOMEPAGE="https://github.com/linux-pam/linux-pam"
+LICENSE="BSD-3-Clause"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc flex bison"
+PATCHES=""
+
+BUILD_DIR="Linux-PAM-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --libdir=/usr/lib --enable-securedir=/run"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "pam ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/pam.d"
+    mkdir -p "${LFS}/etc/security"
+    return 0
+}

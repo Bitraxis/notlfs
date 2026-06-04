@@ -1,0 +1,82 @@
+# Package: s6-rc
+# Description: s6-rc service manager
+# Maintainer: NotLFS Team
+# Version: 0.5.4.0
+
+NAME="s6-rc"
+VERSION="0.5.4.0"
+SOURCE="https://skarnet.org/software/s6-rc/s6-rc-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:4e5b32810435f6215257617436773055221f3a88137422358408548e5033942"
+DESCRIPTION="s6-rc service manager - dependency-based service management for s6"
+HOMEPAGE="https://skarnet.org/software/s6-rc/"
+LICENSE="ISC"
+
+DEPENDENCIES="s6 skalibs execline"
+BUILD_DEPENDENCIES="gcc make s6 skalibs execline"
+PATCHES=""
+
+BUILD_DIR="s6-rc-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build s6-rc ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring s6-rc (custom build system)"
+    cd "${BUILD_DIR}"
+    cat > "compile" << 'EOF'
+#!/bin/sh
+cc -O2 -static -o "$1" "$2"
+EOF
+    chmod +x compile
+    return 0
+}
+
+build() {
+    log_info "Building s6-rc"
+    cd "${BUILD_DIR}"
+    ./compile package
+    ./compile libs
+    return 0
+}
+
+install() {
+    log_info "Installing s6-rc to ${LFS}"
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/s6-rc"
+    
+    for dir in bin command lib libexec; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/bin/"
+            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+        fi
+    done
+    
+    if [ -d "include" ]; then
+        cp -a include/* "${LFS}/usr/include/s6-rc/"
+    fi
+    
+    for dir in doc/*/; do
+        local man_section=$(basename "$dir")
+        if [ "$man_section" = "man1" ]; then
+            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+        fi
+    done
+    
+    for cmd in s6-rc s6-rc-bundle s6-rc-compile s6-rc-dump s6-rc-edit s6-rc-init s6-rc-reload s6-rc-update; do
+        if [ -f "${LFS}/bin/${cmd}" ]; then
+            ln -sf "${LFS}/bin/${cmd}" "${LFS}/usr/bin/${cmd}" 2>/dev/null || true
+        fi
+    done
+    
+    return 0
+}
+
+post_install() {
+    log_info "s6-rc ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/s6-rc" "${LFS}/etc/s6-rc/current" "${LFS}/etc/s6-rc/rc.d"
+    return 0
+}

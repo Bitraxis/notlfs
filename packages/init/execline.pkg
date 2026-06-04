@@ -1,0 +1,61 @@
+# Package: execline
+# Description: execline - Non-interactive shell language
+# Maintainer: NotLFS Team
+# Version: 2.9.3.0
+
+NAME="execline"
+VERSION="2.9.3.0"
+SOURCE="https://skarnet.org/software/execline/execline-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_execline_hash"
+DESCRIPTION="execline - Non-interactive shell language (required by s6)"
+HOMEPAGE="https://skarnet.org/software/execline/"
+LICENSE="ISC"
+
+DEPENDENCIES="skalibs"
+BUILD_DEPENDENCIES="gcc make skalibs"
+PATCHES=""
+
+BUILD_DIR="execline-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build execline ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring execline (custom build system)"
+    cd "${BUILD_DIR}"
+    cat > "compile" << 'EOF'
+#!/bin/sh
+cc -O2 -static -o "$1" "$2"
+EOF
+    chmod +x compile
+    return 0
+}
+
+build() {
+    log_info "Building execline"
+    cd "${BUILD_DIR}"
+    ./compile package
+    return 0
+}
+
+install() {
+    log_info "Installing execline to ${LFS}"
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/bin" "${LFS}/usr/bin"
+    for dir in bin command; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/bin/"
+            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+        fi
+    done
+    return 0
+}
+
+post_install() {
+    log_info "execline ${VERSION} installed successfully"
+    return 0
+}

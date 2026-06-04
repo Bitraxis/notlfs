@@ -1,0 +1,36 @@
+# Package: sysvinit
+# Description: SysV init system
+# Maintainer: NotLFS Team
+# Version: 3.08
+
+NAME="sysvinit"
+VERSION="3.08"
+SOURCE="https://download.savannah.gnu.org/releases/sysvinit/sysvinit-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_sysvinit_hash"
+DESCRIPTION="SysV init - Traditional SysV init system"
+HOMEPAGE="https://savannah.gnu.org/projects/sysvinit/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="sysvinit-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sbindir=/sbin --enable-path=no --enable-utmpx"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    ln -sf "${LFS}/sbin/init" "${LFS}/sbin/init.orig" 2>/dev/null || true
+    return 0
+}
+post_install() {
+    log_info "sysvinit ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/init.d" "${LFS}/etc/rc0.d" "${LFS}/etc/rc1.d" "${LFS}/etc/rc2.d" "${LFS}/etc/rc3.d" "${LFS}/etc/rc4.d" "${LFS}/etc/rc5.d" "${LFS}/etc/rc6.d"
+    mkdir -p "${LFS}/etc/rcS.d"
+    return 0
+}

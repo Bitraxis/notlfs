@@ -1,0 +1,45 @@
+# Package: pulseaudio
+# Description: PulseAudio Sound Server
+# Maintainer: NotLFS Team
+# Version: 17.0
+
+NAME="pulseaudio"
+VERSION="17.0"
+SOURCE="https://freedesktop.org/software/pulseaudio/releases/pulseaudio-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_pulseaudio_hash"
+DESCRIPTION="PulseAudio - A network-capable sound server"
+HOMEPAGE="https://www.freedesktop.org/wiki/Software/PulseAudio/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc alsa-lib libsndfile"
+BUILD_DEPENDENCIES="gcc make glibc meson pkgconf alsa-lib libsndfile"
+PATCHES=""
+
+BUILD_DIR="pulseaudio-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-bluez5 --disable-ofono --disable-esound --disable-hal-compat"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() {
+    log_info "pulseaudio ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/pulse"
+    return 0
+}

@@ -1,0 +1,26 @@
+# Package: grep
+# Description: GNU Grep
+# Maintainer: NotLFS Team
+# Version: 3.11
+
+NAME="grep"
+VERSION="3.11"
+SOURCE="https://ftp.gnu.org/gnu/grep/grep-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:597975999738658c207a2d674597855861286931c6d4564575723f41c354543"
+DESCRIPTION="GNU Grep - Print lines matching a pattern"
+HOMEPAGE="https://www.gnu.org/software/grep/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="grep-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --bindir=/bin"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "grep ${VERSION} installed successfully"; return 0; }

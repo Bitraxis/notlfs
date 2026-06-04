@@ -1,0 +1,49 @@
+# Package: postfix
+# Description: Postfix Mail Server
+# Maintainer: NotLFS Team
+# Version: 3.8.4
+
+NAME="postfix"
+VERSION="3.8.4"
+SOURCE="https://cdn.postfix.johnriley.me/mirrors/postfix-release/official/postfix-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_postfix_hash"
+DESCRIPTION="Postfix - Mail transfer agent"
+HOMEPAGE="http://www.postfix.org/"
+LICENSE="IPL-1.0"
+
+DEPENDENCIES="glibc openssl db"
+BUILD_DEPENDENCIES="gcc make glibc openssl db"
+PATCHES=""
+
+BUILD_DIR="postfix-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sbindir=/sbin --confdir=/etc/postfix --htmldir=/usr/share/doc/postfix/html --mandir=/usr/share/man --readme-dir=/usr/share/doc/postfix/readme --defarch=${LFS_ARCH}-linux-gnu --defgroupname=postfix --defusername=postfix"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    # Create postfix user and group
+    groupadd -f postfix 2>/dev/null || true
+    useradd -c "Postfix Mail Server" -d /var/spool/postfix -g postfix -s /sbin/nologin -u 89 postfix 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    make makefiles cc="gcc ${CFLAGS}"
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} upgrade-configurations install
+    return 0
+}
+post_install() {
+    log_info "postfix ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/postfix"
+    mkdir -p "${LFS}/var/spool/postfix"
+    chmod 750 "${LFS}/var/spool/postfix"
+    return 0
+}

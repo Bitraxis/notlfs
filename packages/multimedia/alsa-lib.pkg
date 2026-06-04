@@ -1,0 +1,26 @@
+# Package: alsa-lib
+# Description: ALSA Library
+# Maintainer: NotLFS Team
+# Version: 1.2.12
+
+NAME="alsa-lib"
+VERSION="1.2.12"
+SOURCE="https://www.alsa-project.org/files/pub/lib/alsa-lib-${VERSION}.tar.bz2"
+SOURCE_HASH="sha256:placeholder_alsa_lib_hash"
+DESCRIPTION="ALSA Library - Advanced Linux Sound Architecture library"
+HOMEPAGE="https://www.alsa-project.org/"
+LICENSE="LGPL-2.1"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="alsa-lib-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-python"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "alsa-lib ${VERSION} installed successfully"; return 0; }

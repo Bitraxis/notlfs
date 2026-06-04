@@ -1,0 +1,32 @@
+# Package: kf5-kate
+# Description: Kate Text Editor
+# Maintainer: NotLFS Team
+# Version: 24.08.0
+
+NAME="kf5-kate"
+VERSION="24.08.0"
+SOURCE="https://download.kde.org/stable/kate/${VERSION}/kate-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_kf5_kate_hash"
+DESCRIPTION="Kate - Advanced Text Editor"
+HOMEPAGE="https://kate-editor.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc qt5-base kf5-framework kf5-ktexteditor"
+BUILD_DEPENDENCIES="gcc make glibc cmake qt5-base extra-cmake-modules kf5-framework kf5-ktexteditor"
+PATCHES=""
+
+BUILD_DIR="kate-${VERSION}"
+CONFIG_OPTIONS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p build
+    cd build
+    cmake ${CONFIG_OPTIONS} ..
+    return 0
+}
+build() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "kf5-kate ${VERSION} installed successfully"; return 0; }

@@ -1,0 +1,32 @@
+# Package: kf5-dolphin
+# Description: Dolphin File Manager
+# Maintainer: NotLFS Team
+# Version: 24.08.0
+
+NAME="kf5-dolphin"
+VERSION="24.08.0"
+SOURCE="https://download.kde.org/stable/kde-apps/${VERSION}/dolphin-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_kf5_dolphin_hash"
+DESCRIPTION="Dolphin - KDE file manager"
+HOMEPAGE="https://userbase.kde.org/Dolphin/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc qt5-base kf5-framework kf5-kio"
+BUILD_DEPENDENCIES="gcc make glibc cmake qt5-base extra-cmake-modules kf5-framework kf5-kio"
+PATCHES=""
+
+BUILD_DIR="dolphin-${VERSION}"
+CONFIG_OPTIONS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p build
+    cd build
+    cmake ${CONFIG_OPTIONS} ..
+    return 0
+}
+build() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "kf5-dolphin ${VERSION} installed successfully"; return 0; }

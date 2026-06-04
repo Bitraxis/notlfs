@@ -1,0 +1,45 @@
+# Package: polkit
+# Description: PolicyKit
+# Maintainer: NotLFS Team
+# Version: 124
+
+NAME="polkit"
+VERSION="124"
+SOURCE="https://download.freedesktop.org/software/polkit/releases/polkit-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_polkit_hash"
+DESCRIPTION="PolicyKit - Application policy framework"
+HOMEPAGE="https://www.freedesktop.org/software/polkit/docs/latest/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc dbus glib expat pam"
+BUILD_DEPENDENCIES="gcc make glibc meson dbus glib expat pam pkgconf"
+PATCHES=""
+
+BUILD_DIR="polkit-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static --disable-gtk-doc --with-authfw=shadow"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() {
+    log_info "polkit ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/polkit-1"
+    return 0
+}

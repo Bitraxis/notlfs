@@ -1,0 +1,34 @@
+# Package: iproute2
+# Description: iproute2 - Networking utilities
+# Maintainer: NotLFS Team
+# Version: 6.8.0
+
+NAME="iproute2"
+VERSION="6.8.0"
+SOURCE="https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:525376828a48b85a5055477821874b3363a0355eb3361368e43377819322"
+DESCRIPTION="iproute2 - Networking and traffic control utilities"
+HOMEPAGE="https://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc linux-headers"
+PATCHES=""
+
+BUILD_DIR="iproute2-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sbindir=/sbin --libexecdir=/usr/lib/iproute2 --disable-man-pages"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    sed -i '/#include <sys\/queue.h>/d' include/linux/if_link.h 2>/dev/null || true
+    sed -i '/#include <sys\/queue.h>/d' include/linux/if_tunnel.h 2>/dev/null || true
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "iproute2 ${VERSION} installed successfully"
+    ln -sfv ../sbin/ip "${LFS}/bin/ip"
+    return 0
+}

@@ -1,0 +1,38 @@
+# Package: dnsmasq
+# Description: Dnsmasq DNS/DHCP Server
+# Maintainer: NotLFS Team
+# Version: 2.90
+
+NAME="dnsmasq"
+VERSION="2.90"
+SOURCE="https://thekelleys.org.uk/dnsmasq/dnsmasq-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_dnsmasq_hash"
+DESCRIPTION="Dnsmasq - Lightweight DNS forwarder and DHCP server"
+HOMEPAGE="https://thekelleys.org.uk/dnsmasq/doc.html"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="dnsmasq-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { return 0; }
+build() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} PREFIX=/usr
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} PREFIX=${LFS}/usr DESTDIR=${LFS} install
+    return 0
+}
+post_install() {
+    log_info "dnsmasq ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/dnsmasq"
+    return 0
+}

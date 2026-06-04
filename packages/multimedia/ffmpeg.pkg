@@ -1,0 +1,26 @@
+# Package: ffmpeg
+# Description: FFmpeg Media Converter
+# Maintainer: NotLFS Team
+# Version: 7.0.2
+
+NAME="ffmpeg"
+VERSION="7.0.2"
+SOURCE="https://ffmpeg.org/releases/ffmpeg-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_ffmpeg_hash"
+DESCRIPTION="FFmpeg - A complete, cross-platform solution to record, convert and stream audio and video"
+HOMEPAGE="https://ffmpeg.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc mesa alsa-lib libx264 libx265"
+BUILD_DEPENDENCIES="gcc make glibc pkgconf yasm nasm mesa alsa-lib libx264 libx265"
+PATCHES=""
+
+BUILD_DIR="ffmpeg-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --enable-gpl --enable-version3 --enable-nonfree --enable-shared --disable-static --disable-debug --enable-libx264 --enable-libx265"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "ffmpeg ${VERSION} installed successfully"; return 0; }

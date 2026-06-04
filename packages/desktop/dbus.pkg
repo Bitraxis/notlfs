@@ -1,0 +1,46 @@
+# Package: dbus
+# Description: D-Bus Message Bus System
+# Maintainer: NotLFS Team
+# Version: 1.14.10
+
+NAME="dbus"
+VERSION="1.14.10"
+SOURCE="https://dbus.freedesktop.org/releases/dbus/dbus-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_dbus_hash"
+DESCRIPTION="D-Bus - Message bus system for inter-process communication"
+HOMEPAGE="https://www.freedesktop.org/wiki/Software/dbus/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc expat"
+BUILD_DEPENDENCIES="gcc make glibc meson expat"
+PATCHES=""
+
+BUILD_DIR="dbus-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-static --disable-systemd --with-system-socket=/run/dbus/system_bus_socket"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() {
+    log_info "dbus ${VERSION} installed successfully"
+    mkdir -p "${LFS}/run/dbus"
+    mkdir -p "${LFS}/etc/dbus-1"
+    return 0
+}

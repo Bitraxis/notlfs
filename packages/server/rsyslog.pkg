@@ -1,0 +1,36 @@
+# Package: rsyslog
+# Description: Rsyslog Syslog Daemon
+# Maintainer: NotLFS Team
+# Version: 8.2408.0
+
+NAME="rsyslog"
+VERSION="8.2408.0"
+SOURCE="https://www.rsyslog.com/files/download/rsyslog/rsyslog-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_rsyslog_hash"
+DESCRIPTION="Rsyslog - Reliable and extended syslog daemon"
+HOMEPAGE="https://www.rsyslog.com/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc zlib"
+BUILD_DEPENDENCIES="gcc make glibc zlib"
+PATCHES=""
+
+BUILD_DIR="rsyslog-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-imfile --enable-impstats --enable-imtcp --enable-imudp --enable-mysql --enable-pgsql --enable-hiredis --enable-elastisearch"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    ./configure ${CONFIG_OPTIONS}
+    return 0
+}
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "rsyslog ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/rsyslog.d"
+    mkdir -p "${LFS}/var/lib/rsyslog"
+    mkdir -p "${LFS}/var/spool/rsyslog"
+    return 0
+}

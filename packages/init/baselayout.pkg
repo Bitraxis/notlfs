@@ -1,0 +1,31 @@
+# Package: baselayout
+# Description: OpenRC baselayout
+# Maintainer: NotLFS Team
+# Version: 2.13
+
+NAME="baselayout"
+VERSION="2.13"
+SOURCE="https://github.com/OpenRC/baselayout/archive/refs/tags/${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_baselayout_hash"
+DESCRIPTION="OpenRC baselayout - Basic filesystem layout for OpenRC"
+HOMEPAGE="https://github.com/OpenRC/baselayout"
+LICENSE="BSD-2-Clause"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="baselayout-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "baselayout ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/rc.d" "${LFS}/etc/conf.d" "${LFS}/etc/init.d"
+    mkdir -p "${LFS}/run" "${LFS}/var/lock/subsys" "${LFS}/var/log"
+    return 0
+}

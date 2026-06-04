@@ -1,0 +1,68 @@
+# Package: skalibs
+# Description: skalibs - libraries for skarnet.org software
+# Maintainer: NotLFS Team
+# Version: 2.14.1.0
+
+NAME="skalibs"
+VERSION="2.14.1.0"
+SOURCE="https://skarnet.org/software/skalibs/skalibs-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:38b25491555515b7c38b25491555515b7c38b25491555515b7c38b2549155"
+DESCRIPTION="skalibs - libraries for skarnet.org software (required by s6)"
+HOMEPAGE="https://skarnet.org/software/skalibs/"
+LICENSE="ISC"
+
+DEPENDENCIES=""
+BUILD_DEPENDENCIES="gcc make"
+PATCHES=""
+
+BUILD_DIR="skalibs-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build skalibs ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring skalibs (custom build system)"
+    cd "${BUILD_DIR}"
+    cat > "compile" << 'EOF'
+#!/bin/sh
+cc -O2 -static -o "$1" "$2"
+EOF
+    chmod +x compile
+    return 0
+}
+
+build() {
+    log_info "Building skalibs"
+    cd "${BUILD_DIR}"
+    ./compile package
+    ./compile libs
+    return 0
+}
+
+install() {
+    log_info "Installing skalibs to ${LFS}"
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/skalibs" "${LFS}/usr/include/skalibs"
+    for dir in bin command; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/bin/"
+            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+        fi
+    done
+    if [ -d "lib" ]; then
+        cp -a lib/* "${LFS}/usr/lib/skalibs/"
+    fi
+    if [ -d "include" ]; then
+        cp -a include/* "${LFS}/usr/include/skalibs/"
+    fi
+    return 0
+}
+
+post_install() {
+    log_info "skalibs ${VERSION} installed successfully"
+    return 0
+}

@@ -1,0 +1,32 @@
+# Package: wget
+# Description: GNU Wget
+# Maintainer: NotLFS Team
+# Version: 1.24.5
+
+NAME="wget"
+VERSION="1.24.5"
+SOURCE="https://ftp.gnu.org/gnu/wget/wget-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:56f56c038945a536d18355893c370945526339946048719551755935938"
+DESCRIPTION="GNU Wget - A network utility for retrieving files from the Web"
+HOMEPAGE="https://www.gnu.org/software/wget/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc openssl"
+BUILD_DEPENDENCIES="gcc make glibc openssl"
+PATCHES=""
+
+BUILD_DIR="wget-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --with-ssl=openssl --enable-iri --disable-debug"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "wget ${VERSION} installed successfully"
+    cat > "${LFS}/etc/wgetrc" << 'EOF'
+# NotLFS default wgetrc
+EOF
+    return 0
+}

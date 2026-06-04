@@ -1,0 +1,26 @@
+# Package: file
+# Description: File - Determine file type
+# Maintainer: NotLFS Team
+# Version: 5.45
+
+NAME="file"
+VERSION="5.45"
+SOURCE="https://astron.com/pub/file/file-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:9921697883367796376164745277553d672f18a991c5562a1d7248303178210"
+DESCRIPTION="File command - Determines the type of a file using magic numbers"
+HOMEPAGE="https://www.darwinsys.com/file/"
+LICENSE="BSD-2-Clause"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="file-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-bzlib --disable-libseccomp --disable-xzlib --disable-zlib"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "file ${VERSION} installed successfully"; return 0; }

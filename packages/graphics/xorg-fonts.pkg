@@ -1,0 +1,26 @@
+# Package: xorg-fonts
+# Description: X.Org Fonts
+# Maintainer: NotLFS Team
+# Version: 7.7+1.0.4
+
+NAME="xorg-fonts"
+VERSION="7.7+1.0.4"
+SOURCE="https://xorg.freedesktop.org/archive/individual/font/font-all-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_xorg_fonts_hash"
+DESCRIPTION="X.Org Fonts - Standard fonts for X11"
+HOMEPAGE="https://www.x.org/wiki/"
+LICENSE="MIT"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="font-all-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "xorg-fonts ${VERSION} installed successfully"; return 0; }

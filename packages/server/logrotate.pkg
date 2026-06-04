@@ -1,0 +1,31 @@
+# Package: logrotate
+# Description: Logrotate
+# Maintainer: NotLFS Team
+# Version: 3.22.0
+
+NAME="logrotate"
+VERSION="3.22.0"
+SOURCE="https://github.com/logrotate/logrotate/releases/download/${VERSION}/logrotate-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_logrotate_hash"
+DESCRIPTION="Logrotate - Log file rotation utility"
+HOMEPAGE="https://github.com/logrotate/logrotate"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc popt"
+BUILD_DEPENDENCIES="gcc make glibc popt"
+PATCHES=""
+
+BUILD_DIR="logrotate-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "logrotate ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/logrotate.d"
+    mkdir -p "${LFS}/var/lib/logrotate"
+    return 0
+}

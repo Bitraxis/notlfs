@@ -1,0 +1,34 @@
+# Package: procps
+# Description: Procps - Process utilities
+# Maintainer: NotLFS Team
+# Version: 4.0.4
+
+NAME="procps"
+VERSION="4.0.4"
+SOURCE="https://downloads.sourceforge.net/project/procps-ng/Production/procps-ng-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:433992305391934517699410055958883162459254783a365f778248954438"
+DESCRIPTION="Procps - Utilities for viewing and controlling processes"
+HOMEPAGE="https://gitlab.com/procps-ng/procps"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc ncurses"
+BUILD_DEPENDENCIES="gcc make glibc ncurses"
+PATCHES=""
+
+BUILD_DIR="procps-ng-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --exec-prefix=/ --libdir=/usr/lib --docdir=/usr/share/doc/procps-${VERSION} --disable-static --disable-kill"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mv -v "${LFS}/usr/bin/ps" "${LFS}/bin/"
+    mv -v "${LFS}/usr/bin/top" "${LFS}/bin/"
+    mv -v "${LFS}/usr/bin/free" "${LFS}/bin/"
+    mv -v "${LFS}/usr/bin/kill" "${LFS}/bin/"
+    return 0
+}
+post_install() { log_info "procps ${VERSION} installed successfully"; return 0; }

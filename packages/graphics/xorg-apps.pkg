@@ -1,0 +1,26 @@
+# Package: xorg-apps
+# Description: X.Org Applications
+# Maintainer: NotLFS Team
+# Version: 7.7+23.1
+
+NAME="xorg-apps"
+VERSION="7.7+23.1"
+SOURCE="https://xorg.freedesktop.org/archive/individual/app/xorg-apps-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_xorg_apps_hash"
+DESCRIPTION="X.Org Applications - Common X11 client applications"
+HOMEPAGE="https://www.x.org/wiki/"
+LICENSE="MIT"
+
+DEPENDENCIES="glibc xorg-server"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="xorg-apps-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "xorg-apps ${VERSION} installed successfully"; return 0; }

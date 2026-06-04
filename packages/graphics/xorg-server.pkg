@@ -1,0 +1,30 @@
+# Package: xorg-server
+# Description: X.Org X Server
+# Maintainer: NotLFS Team
+# Version: 21.1.12
+
+NAME="xorg-server"
+VERSION="21.1.12"
+SOURCE="https://xorg.freedesktop.org/archive/individual/xserver/xorg-server-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_xorg_server_hash"
+DESCRIPTION="X.Org X Server - The X Window System display server"
+HOMEPAGE="https://www.x.org/wiki/"
+LICENSE="MIT"
+
+DEPENDENCIES="glibc mesa libepoxy xorg-proto xtrans xcb-util xcb-util-image xcb-util-keysyms xcb-util-renderutil xcb-util-wm xfont2"
+BUILD_DEPENDENCIES="gcc make glibc mesa pkgconf"
+PATCHES=""
+
+BUILD_DIR="xorg-server-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --localstatedir=/var --sysconfdir=/etc --disable-docs --enable-install-setuid --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "xorg-server ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/X11"
+    return 0
+}

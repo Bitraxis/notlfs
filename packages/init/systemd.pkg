@@ -1,0 +1,57 @@
+# Package: systemd
+# Description: systemd system and service manager
+# Maintainer: NotLFS Team
+# Version: 255.4
+
+NAME="systemd"
+VERSION="255.4"
+SOURCE="https://github.com/systemd/systemd/archive/refs/tags/v${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_systemd_hash"
+DESCRIPTION="systemd - System and service manager (simplified for NotLFS)"
+HOMEPAGE="https://systemd.io/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc util-linux dbus pam"
+BUILD_DEPENDENCIES="gcc make glibc meson util-linux dbus pam pkgconf"
+PATCHES=""
+
+BUILD_DIR="systemd-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --with-sysvinit-path= --with-sysvrcnd-path= --disable-firstboot --disable-hibernate --disable-ldconfig --disable-manpages --disable-sysusers --disable-tmpfiles --disable-hwdb"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build systemd ${VERSION}"
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+
+configure() {
+    log_info "Configuring systemd"
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+
+build() {
+    log_info "Building systemd"
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+
+install() {
+    log_info "Installing systemd to ${LFS}"
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    
+    # Create essential symlinks
+    ln -sf "${LFS}/usr/lib/systemd/systemd" "${LFS}/sbin/init" 2>/dev/null || true
+    
+    return 0
+}
+
+post_install() {
+    log_info "systemd ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/systemd" "${LFS}/run/systemd" "${LFS}/var/lib/systemd"
+    return 0
+}

@@ -1,0 +1,30 @@
+# Package: iptables
+# Description: iptables Firewall
+# Maintainer: NotLFS Team
+# Version: 1.8.10
+
+NAME="iptables"
+VERSION="1.8.10"
+SOURCE="https://www.netfilter.org/projects/iptables/files/iptables-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_iptables_hash"
+DESCRIPTION="iptables - IPv4 packet filter administration"
+HOMEPAGE="https://www.netfilter.org/projects/iptables/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc libnfnetlink libnftnl"
+BUILD_DEPENDENCIES="gcc make glibc libnfnetlink libnftnl pkgconf"
+PATCHES=""
+
+BUILD_DIR="iptables-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sbindir=/sbin --enable-libipq --enable-shared --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "iptables ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/iptables"
+    return 0
+}

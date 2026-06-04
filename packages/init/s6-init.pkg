@@ -1,0 +1,66 @@
+# Package: s6-init
+# Description: s6-init - s6 as init
+# Maintainer: NotLFS Team
+# Version: 1.0.0.0
+
+NAME="s6-init"
+VERSION="1.0.0.0"
+SOURCE="https://skarnet.org/software/s6-init/s6-init-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_s6_init_hash"
+DESCRIPTION="s6-init - s6 as init system (PID 1)"
+HOMEPAGE="https://skarnet.org/software/s6-init/"
+LICENSE="ISC"
+
+DEPENDENCIES="s6 s6-rc skalibs execline"
+BUILD_DEPENDENCIES="gcc make s6 s6-rc skalibs execline"
+PATCHES=""
+
+BUILD_DIR="s6-init-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing to build s6-init ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring s6-init (custom build system)"
+    cd "${BUILD_DIR}"
+    cat > "compile" << 'EOF'
+#!/bin/sh
+cc -O2 -static -o "$1" "$2"
+EOF
+    chmod +x compile
+    return 0
+}
+
+build() {
+    log_info "Building s6-init"
+    cd "${BUILD_DIR}"
+    ./compile package
+    return 0
+}
+
+install() {
+    log_info "Installing s6-init to ${LFS}"
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/sbin" "${LFS}/bin"
+    
+    for dir in bin; do
+        if [ -d "$dir" ]; then
+            cp -a "$dir"/* "${LFS}/sbin/"
+            chmod 755 "${LFS}/sbin/"*"$dir"* 2>/dev/null || true
+        fi
+    done
+    
+    # Create symlink for init
+    ln -sf "${LFS}/sbin/s6-init" "${LFS}/sbin/init" 2>/dev/null || true
+    
+    return 0
+}
+
+post_install() {
+    log_info "s6-init ${VERSION} installed successfully"
+    return 0
+}

@@ -1,0 +1,40 @@
+# Package: fail2ban
+# Description: Fail2Ban Intrusion Prevention
+# Maintainer: NotLFS Team
+# Version: 1.0.2
+
+NAME="fail2ban"
+VERSION="1.0.2"
+SOURCE="https://github.com/fail2ban/fail2ban/releases/download/${VERSION}/fail2ban-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_fail2ban_hash"
+DESCRIPTION="Fail2Ban - Intrusion prevention framework"
+HOMEPAGE="https://www.fail2ban.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc python3"
+BUILD_DEPENDENCIES="gcc make glibc python3"
+PATCHES=""
+
+BUILD_DIR="fail2ban-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var"
+MAKE_OPTIONS=""
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    python3 setup.py build
+    return 0
+}
+build() { return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    python3 setup.py install --prefix=${LFS}/usr --root=${LFS}
+    return 0
+}
+post_install() {
+    log_info "fail2ban ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/fail2ban"
+    mkdir -p "${LFS}/var/lib/fail2ban"
+    mkdir -p "${LFS}/run/fail2ban"
+    return 0
+}

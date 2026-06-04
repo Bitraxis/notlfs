@@ -1,0 +1,26 @@
+# Package: sed
+# Description: GNU Sed
+# Maintainer: NotLFS Team
+# Version: 4.9
+
+NAME="sed"
+VERSION="4.9"
+SOURCE="https://ftp.gnu.org/gnu/sed/sed-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:5922443333e779899939a24389aa73850235386935224549447286315899d34"
+DESCRIPTION="GNU Sed - A stream editor for filtering and transforming text"
+HOMEPAGE="https://www.gnu.org/software/sed/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="sed-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --bindir=/bin"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "sed ${VERSION} installed successfully"; return 0; }

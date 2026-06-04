@@ -1,0 +1,44 @@
+# Package: sddm
+# Description: SDDM Display Manager
+# Maintainer: NotLFS Team
+# Version: 0.20.0
+
+NAME="sddm"
+VERSION="0.20.0"
+SOURCE="https://github.com/sddm/sddm/releases/download/v${VERSION}/sddm-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_sddm_hash"
+DESCRIPTION="SDDM - Simple Desktop Display Manager"
+HOMEPAGE="https://github.com/sddm/sddm"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc qt5-base xorg-server xorg-apps"
+BUILD_DEPENDENCIES="gcc make glibc cmake qt5-base extra-cmake-modules xorg-server"
+PATCHES=""
+
+BUILD_DIR="sddm-${VERSION}"
+CONFIG_OPTIONS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p build
+    cd build
+    cmake ${CONFIG_OPTIONS} ..
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}/build"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}/build"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    return 0
+}
+post_install() {
+    log_info "sddm ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/sddm.conf.d"
+    return 0
+}

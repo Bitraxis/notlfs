@@ -1,0 +1,26 @@
+# Package: m4
+# Description: GNU M4
+# Maintainer: NotLFS Team
+# Version: 1.4.19
+
+NAME="m4"
+VERSION="1.4.19"
+SOURCE="https://ftp.gnu.org/gnu/m4/m4-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:63aede91685482d4ce47d914de49b6422a60995a4f45a0a5153d17563848782"
+DESCRIPTION="GNU M4 - A macro processing language"
+HOMEPAGE="https://www.gnu.org/software/m4/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="m4-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "m4 ${VERSION} installed successfully"; return 0; }

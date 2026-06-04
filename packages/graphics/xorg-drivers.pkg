@@ -1,0 +1,26 @@
+# Package: xorg-drivers
+# Description: X.Org Video Drivers
+# Maintainer: NotLFS Team
+# Version: 23.1
+
+NAME="xorg-drivers"
+VERSION="23.1"
+SOURCE="https://xorg.freedesktop.org/archive/individual/driver/xf86-video-all-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_xorg_drivers_hash"
+DESCRIPTION="X.Org Video Drivers - Display drivers for X11"
+HOMEPAGE="https://www.x.org/wiki/"
+LICENSE="MIT"
+
+DEPENDENCIES="glibc xorg-server"
+BUILD_DEPENDENCIES="gcc make glibc pkgconf"
+PATCHES=""
+
+BUILD_DIR="xf86-video-all-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "xorg-drivers ${VERSION} installed successfully"; return 0; }

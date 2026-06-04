@@ -1,0 +1,49 @@
+# Package: linux-headers
+# Description: Linux Kernel Headers
+# Maintainer: NotLFS Team
+# Version: 6.8.1
+
+NAME="linux-headers"
+VERSION="6.8.1"
+SOURCE="https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:34778150f4023992737d699564261e541753423369621681b986e9565951d30"
+DESCRIPTION="Linux Kernel Headers - Required for building glibc and other system packages"
+HOMEPAGE="https://www.kernel.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES=""
+BUILD_DEPENDENCIES=""
+PATCHES=""
+
+BUILD_DIR="linux-${VERSION}"
+CONFIG_OPTIONS=""
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing Linux headers ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    return 0
+}
+
+build() {
+    log_info "Building Linux headers ${VERSION}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} mrproper
+    make ${MAKE_OPTIONS} headers
+    return 0
+}
+
+install() {
+    log_info "Installing Linux headers to ${LFS}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} INSTALL_HDR_PATH=dest headers_install
+    cp -rv dest/include/* "${LFS}/usr/include/"
+    return 0
+}
+
+post_install() {
+    log_info "Linux headers ${VERSION} installed successfully"
+}

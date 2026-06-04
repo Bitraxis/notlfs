@@ -1,0 +1,26 @@
+# Package: sqlite
+# Description: SQLite Database
+# Maintainer: NotLFS Team
+# Version: 3.45.2
+
+NAME="sqlite"
+VERSION="3.45.2"
+SOURCE="https://www.sqlite.org/2024/sqlite-autoconf-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_sqlite_hash"
+DESCRIPTION="SQLite - Self-contained, serverless, zero-configuration database engine"
+HOMEPAGE="https://www.sqlite.org/"
+LICENSE="Public Domain"
+
+DEPENDENCIES="glibc readline"
+BUILD_DEPENDENCIES="gcc make glibc readline"
+PATCHES=""
+
+BUILD_DIR="sqlite-autoconf-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-static"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "sqlite ${VERSION} installed successfully"; return 0; }

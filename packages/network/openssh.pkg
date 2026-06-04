@@ -1,0 +1,62 @@
+# Package: openssh
+# Description: OpenSSH
+# Maintainer: NotLFS Team
+# Version: 9.8p1
+
+NAME="openssh"
+VERSION="9.8p1"
+SOURCE="https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:956286193209139534753535a8c493431933986235a7988131ef454717"
+DESCRIPTION="OpenSSH - Secure Shell (SSH) protocol implementation"
+HOMEPAGE="https://www.openssh.com/"
+LICENSE="BSD-2-Clause"
+
+DEPENDENCIES="glibc openssl zlib"
+BUILD_DEPENDENCIES="gcc make glibc openssl zlib"
+PATCHES=""
+
+BUILD_DIR="openssh-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc/ssh --with-privsep-path=/run/sshd --with-pie --disable-strip --disable-etc-default-login"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p "${LFS}/var/run/sshd"
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mkdir -p "${LFS}/etc/ssh"
+    return 0
+}
+post_install() {
+    log_info "openssh ${VERSION} installed successfully"
+    cat > "${LFS}/etc/ssh/sshd_config" << 'EOF'
+Port 22
+Protocol 2
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
+PermitRootLogin no
+PasswordAuthentication yes
+ChallengeResponseAuthentication no
+UseDNS no
+PidFile /run/sshd.pid
+EOF
+    chmod 600 "${LFS}/etc/ssh/sshd_config"
+    cat > "${LFS}/etc/ssh/ssh_config" << 'EOF'
+Host *
+    HashKnownHosts yes
+    SendEnv LANG LC_*
+EOF
+    chmod 644 "${LFS}/etc/ssh/ssh_config"
+    chmod 700 "${LFS}/etc/ssh"
+    return 0
+}

@@ -1,0 +1,32 @@
+# Package: xz
+# Description: XZ Utils
+# Maintainer: NotLFS Team
+# Version: 5.6.1
+
+NAME="xz"
+VERSION="5.6.1"
+SOURCE="https://github.com/tukaani-project/xz/releases/download/v${VERSION}/xz-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:51436495e44788b67390244553f7535174524346614025b45679924de059512"
+DESCRIPTION="XZ Utils - Compression tools using the XZ format"
+HOMEPAGE="https://tukaani.org/xz/"
+LICENSE="Public Domain"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="xz-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-static --docdir=/usr/share/doc/xz-${VERSION}"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    mv -v "${LFS}/usr/bin/xz" "${LFS}/bin/"
+    mv -v "${LFS}/usr/bin/unxz" "${LFS}/bin/"
+    return 0
+}
+post_install() { log_info "xz ${VERSION} installed successfully"; return 0; }

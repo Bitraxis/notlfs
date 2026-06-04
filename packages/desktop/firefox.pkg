@@ -1,0 +1,46 @@
+# Package: firefox
+# Description: Mozilla Firefox Web Browser
+# Maintainer: NotLFS Team
+# Version: 128.0
+
+NAME="firefox"
+VERSION="128.0"
+SOURCE="https://download.mozilla.org/firefox/releases/${VERSION}/source/firefox-${VERSION}.source.tar.xz"
+SOURCE_HASH="sha256:placeholder_firefox_hash"
+DESCRIPTION="Mozilla Firefox - Web browser"
+HOMEPAGE="https://www.mozilla.org/firefox/"
+LICENSE="MPL-2.0"
+
+DEPENDENCIES="glibc alsa-lib pulseaudio dbus glib"
+BUILD_DEPENDENCIES="gcc make glibc python3 rustc cargo alsa-lib pulseaudio dbus glib pkgconf autoconf2.13"
+PATCHES=""
+
+BUILD_DIR="firefox-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --enable-optimize --enable-release --disable-debug --disable-tests --with-system-ffmpeg --with-system-icu"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    # Firefox uses a complex build system with Rust
+    # This is a simplified version
+}
+configure() {
+    cd "${BUILD_DIR}"
+    ./configure ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    return 0
+}
+post_install() {
+    log_info "firefox ${VERSION} installed successfully"
+    mkdir -p "${LFS}/usr/lib/firefox"
+    return 0
+}

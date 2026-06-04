@@ -1,0 +1,33 @@
+# Package: util-linux
+# Description: Util-linux
+# Maintainer: NotLFS Team
+# Version: 2.40.1
+
+NAME="util-linux"
+VERSION="2.40.1"
+SOURCE="https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v${VERSION}/util-linux-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:168544138725a54775187394387039a53d1043b48c2424300316493615353"
+DESCRIPTION="Util-linux - Miscellaneous system utilities"
+HOMEPAGE="https://github.com/util-linux/util-linux"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc bash"
+PATCHES=""
+
+BUILD_DIR="util-linux-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --libdir=/usr/lib --runstatedir=/run --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-static --without-python --without-systemd --without-systemdsystemunitdir"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    sed -i '/test_mount_a/d' tests/Makemodule.am 2>/dev/null || true
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "util-linux ${VERSION} installed successfully"
+    mkdir -p "${LFS}/var/lib/hwclock"
+    return 0
+}

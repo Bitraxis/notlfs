@@ -1,0 +1,36 @@
+# Package: dinit
+# Description: dinit service manager
+# Maintainer: NotLFS Team
+# Version: 0.17.0
+
+NAME="dinit"
+VERSION="0.17.0"
+SOURCE="https://github.com/davmac314/dinit/releases/download/v${VERSION}/dinit-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_dinit_hash"
+DESCRIPTION="dinit - Service supervisor and init system"
+HOMEPAGE="https://github.com/davmac314/dinit"
+LICENSE="Apache-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="dinit-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/run"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    ./configure ${CONFIG_OPTIONS}
+    return 0
+}
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "dinit ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/dinit"
+    mkdir -p "${LFS}/run/dinit"
+    ln -sf "${LFS}/usr/bin/dinit" "${LFS}/sbin/init" 2>/dev/null || true
+    return 0
+}

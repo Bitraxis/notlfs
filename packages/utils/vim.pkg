@@ -1,0 +1,49 @@
+# Package: vim
+# Description: Vim - Vi IMproved
+# Maintainer: NotLFS Team
+# Version: 9.1.0
+
+NAME="vim"
+VERSION="9.1.0"
+SOURCE="https://github.com/vim/vim/releases/download/v${VERSION}/vim-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:58b0686844014735a8e5a99b240175a9504653737253236645821823651688"
+DESCRIPTION="Vim - Vi IMproved text editor"
+HOMEPAGE="https://www.vim.org/"
+LICENSE="Vim"
+
+DEPENDENCIES="glibc ncurses"
+BUILD_DEPENDENCIES="gcc make glibc ncurses"
+PATCHES=""
+
+BUILD_DIR="vim-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --with-features=huge --enable-multibyte --enable-cscope --enable-gui=no --enable-fail-if-missing"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    rm -rf src/libvterm 2>/dev/null || true
+}
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    ln -sfv vim "${LFS}/usr/bin/vi"
+    ln -sfv vim "${LFS}/usr/bin/view"
+    ln -sfv vim "${LFS}/usr/bin/editor"
+    return 0
+}
+post_install() {
+    log_info "vim ${VERSION} installed successfully"
+    cat > "${LFS}/etc/vimrc" << 'EOF'
+set nocompatible
+set backspace=2
+set mouse=a
+set hlsearch
+set incsearch
+set showcmd
+set number
+syntax on
+EOF
+    return 0
+}

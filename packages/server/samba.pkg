@@ -1,0 +1,33 @@
+# Package: samba
+# Description: Samba File Server
+# Maintainer: NotLFS Team
+# Version: 4.20.4
+
+NAME="samba"
+VERSION="4.20.4"
+SOURCE="https://download.samba.org/pub/samba/stable/samba-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_samba_hash"
+DESCRIPTION="Samba - Windows interoperability suite"
+HOMEPAGE="https://www.samba.org/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc openssl readline popt talloc tevent ldb"
+BUILD_DEPENDENCIES="gcc make glibc python3 openssl readline popt talloc tevent ldb pkgconf"
+PATCHES=""
+
+BUILD_DIR="samba-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --enable-fhs --disable-cups --disable-iprint --disable-pie"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "samba ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/samba"
+    mkdir -p "${LFS}/var/lib/samba"
+    mkdir -p "${LFS}/var/log/samba"
+    mkdir -p "${LFS}/var/run/samba"
+    return 0
+}

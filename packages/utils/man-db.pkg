@@ -1,0 +1,40 @@
+# Package: man-db
+# Description: Man-db
+# Maintainer: NotLFS Team
+# Version: 2.12.0
+
+NAME="man-db"
+VERSION="2.12.0"
+SOURCE="https://download.savannah.gnu.org/releases/man-db/man-db-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:2e48594336582111518603461994906a154986932849067435399437046128"
+DESCRIPTION="Man-db - Manual page indexer and viewer"
+HOMEPAGE="https://savannah.gnu.org/projects/man-db/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="man-db-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --docdir=/usr/share/doc/man-db-${VERSION} --sysconfdir=/etc --disable-setuid --enable-cache-owner=bin --with-browser=/usr/bin/less --with-pager=/usr/bin/less"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "man-db ${VERSION} installed successfully"
+    cat > "${LFS}/etc/man_db.conf" << 'EOF'
+MANDATORY_MANPATH                       /usr/man
+MANDATORY_MANPATH                       /usr/share/man
+MANDATORY_MANPATH                       /usr/local/man
+MANDATORY_MANPATH                       /usr/local/share/man
+MANPATH_MAP     /bin                    /usr/share/man
+MANPATH_MAP     /usr/bin                /usr/share/man
+MANPATH_MAP     /sbin                   /usr/share/man
+MANPATH_MAP     /usr/sbin               /usr/share/man
+CREATE          /var/cache/man 0644
+EOF
+    return 0
+}

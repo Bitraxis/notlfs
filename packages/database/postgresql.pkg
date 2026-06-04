@@ -1,0 +1,36 @@
+# Package: postgresql
+# Description: PostgreSQL Database
+# Maintainer: NotLFS Team
+# Version: 17.2
+
+NAME="postgresql"
+VERSION="17.2"
+SOURCE="https://download.postgresql.org/source/v${VERSION}/postgresql-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_postgresql_hash"
+DESCRIPTION="PostgreSQL - Object-relational database management system"
+HOMEPAGE="https://www.postgresql.org/"
+LICENSE="PostgreSQL"
+
+DEPENDENCIES="glibc openssl readline zlib"
+BUILD_DEPENDENCIES="gcc make glibc openssl readline zlib gettext perl python3"
+PATCHES=""
+
+BUILD_DIR="postgresql-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --datadir=/usr/share/postgresql --docdir=/usr/share/doc/postgresql-${VERSION} --disable-rpath --with-openssl --with-readline --with-zlib --with-libxslt --with-perl --with-python --with-uuid=e2fs"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() {
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    return 0
+}
+post_install() {
+    log_info "postgresql ${VERSION} installed successfully"
+    mkdir -p "${LFS}/var/lib/postgresql"
+    mkdir -p "${LFS}/run/postgresql"
+    mkdir -p "${LFS}/etc/postgresql"
+    return 0
+}

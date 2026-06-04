@@ -1,0 +1,41 @@
+# Package: mpv
+# Description: MPV Media Player
+# Maintainer: NotLFS Team
+# Version: 0.38.0
+
+NAME="mpv"
+VERSION="0.38.0"
+SOURCE="https://github.com/mpv-player/mpv/releases/download/v${VERSION}/mpv-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_mpv_hash"
+DESCRIPTION="MPV - A free, open source, and cross-platform media player"
+HOMEPAGE="https://mpv.io/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc ffmpeg alsa-lib pulseaudio"
+BUILD_DEPENDENCIES="gcc make glibc meson pkgconf ffmpeg alsa-lib pulseaudio"
+PATCHES=""
+
+BUILD_DIR="mpv-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --disable-cplayer --enable-libmpv-shared"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    cd "${BUILD_DIR}"
+    pip3 install meson 2>/dev/null || true
+}
+configure() {
+    cd "${BUILD_DIR}"
+    meson setup build ${CONFIG_OPTIONS}
+    return 0
+}
+build() {
+    cd "${BUILD_DIR}"
+    ninja -C build
+    return 0
+}
+install() {
+    cd "${BUILD_DIR}"
+    DESTDIR=${LFS} ninja -C build install
+    return 0
+}
+post_install() { log_info "mpv ${VERSION} installed successfully"; return 0; }

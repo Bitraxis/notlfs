@@ -1,0 +1,55 @@
+# Package: bash
+# Description: GNU Bourne Again Shell
+# Maintainer: NotLFS Team
+# Version: 5.2.21
+
+NAME="bash"
+VERSION="5.2.21"
+SOURCE="https://ftp.gnu.org/gnu/bash/bash-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:3933197a23828c2e25250253249a3447b9835754858995538737a244464885"
+DESCRIPTION="GNU Bourne Again Shell - The default shell for most Linux distributions"
+HOMEPAGE="https://www.gnu.org/software/bash/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="bash-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --without-bash-malloc --with-installed-readline"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() {
+    log_info "Preparing bash ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring bash ${VERSION}"
+    cd "${BUILD_DIR}"
+    "./configure" ${CONFIG_OPTIONS}
+    return 0
+}
+
+build() {
+    log_info "Building bash ${VERSION}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS}
+    return 0
+}
+
+install() {
+    log_info "Installing bash to ${LFS}"
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
+    ln -sfv bash "${LFS}/bin/sh"
+    return 0
+}
+
+post_install() {
+    log_info "bash ${VERSION} installed successfully"
+    cat > "${LFS}/etc/shells" << 'EOF'
+/bin/sh
+/bin/bash
+EOF
+}

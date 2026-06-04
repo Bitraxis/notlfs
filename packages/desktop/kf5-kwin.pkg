@@ -1,0 +1,32 @@
+# Package: kf5-kwin
+# Description: KWin Window Manager
+# Maintainer: NotLFS Team
+# Version: 5.27.12
+
+NAME="kf5-kwin"
+VERSION="5.27.12"
+SOURCE="https://download.kde.org/stable/plasma/${VERSION}/kwin-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_kf5_kwin_hash"
+DESCRIPTION="KWin - The KDE window manager"
+HOMEPAGE="https://kde.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc qt5-base kf5-framework xorg-server mesa"
+BUILD_DEPENDENCIES="gcc make glibc cmake qt5-base extra-cmake-modules kf5-framework xorg-server mesa"
+PATCHES=""
+
+BUILD_DIR="kwin-${VERSION}"
+CONFIG_OPTIONS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p build
+    cd build
+    cmake ${CONFIG_OPTIONS} ..
+    return 0
+}
+build() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "kf5-kwin ${VERSION} installed successfully"; return 0; }

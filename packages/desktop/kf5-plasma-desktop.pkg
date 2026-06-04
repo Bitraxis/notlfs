@@ -1,0 +1,32 @@
+# Package: kf5-plasma-desktop
+# Description: KDE Plasma Desktop Components
+# Maintainer: NotLFS Team
+# Version: 5.27.12
+
+NAME="kf5-plasma-desktop"
+VERSION="5.27.12"
+SOURCE="https://download.kde.org/stable/plasma/${VERSION}/plasma-desktop-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_kf5_plasma_desktop_hash"
+DESCRIPTION="KDE Plasma Desktop Components"
+HOMEPAGE="https://kde.org/plasma-desktop/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc kf5-plasma kf5-kio"
+BUILD_DEPENDENCIES="gcc make glibc cmake qt5-base kf5-plasma kf5-kio"
+PATCHES=""
+
+BUILD_DIR="plasma-desktop-${VERSION}"
+CONFIG_OPTIONS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() {
+    cd "${BUILD_DIR}"
+    mkdir -p build
+    cd build
+    cmake ${CONFIG_OPTIONS} ..
+    return 0
+}
+build() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}/build"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "kf5-plasma-desktop ${VERSION} installed successfully"; return 0; }

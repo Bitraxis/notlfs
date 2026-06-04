@@ -1,0 +1,31 @@
+# Package: chrony
+# Description: Chrony Time Synchronization
+# Maintainer: NotLFS Team
+# Version: 4.4
+
+NAME="chrony"
+VERSION="4.4"
+SOURCE="https://download.tuxfamily.org/chrony/chrony-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:placeholder_chrony_hash"
+DESCRIPTION="Chrony - NTP client and server"
+HOMEPAGE="https://chrony.tuxfamily.org/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="chrony-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "chrony ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/chrony"
+    mkdir -p "${LFS}/var/lib/chrony"
+    return 0
+}

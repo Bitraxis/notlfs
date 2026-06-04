@@ -1,0 +1,31 @@
+# Package: nfs-utils
+# Description: NFS Utilities
+# Maintainer: NotLFS Team
+# Version: 2.6.3
+
+NAME="nfs-utils"
+VERSION="2.6.3"
+SOURCE="https://sourceforge.net/projects/nfs/files/nfs-utils/${VERSION}/nfs-utils-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:placeholder_nfs_utils_hash"
+DESCRIPTION="NFS Utilities - Network File System user-space tools"
+HOMEPAGE="https://nfs.sourceforge.net/"
+LICENSE="GPL-2.0"
+
+DEPENDENCIES="glibc libtirpc libnfsidmap"
+BUILD_DEPENDENCIES="gcc make glibc libtirpc libnfsidmap pkgconf"
+PATCHES=""
+
+BUILD_DIR="nfs-utils-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --sbindir=/sbin --enable-nfsdcld --enable-gss --disable-ldconfig"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() {
+    log_info "nfs-utils ${VERSION} installed successfully"
+    mkdir -p "${LFS}/etc/nfs"
+    mkdir -p "${LFS}/var/lib/nfs"
+    return 0
+}

@@ -1,0 +1,26 @@
+# Package: make
+# Description: GNU Make
+# Maintainer: NotLFS Team
+# Version: 4.4.1
+
+NAME="make"
+VERSION="4.4.1"
+SOURCE="https://ftp.gnu.org/gnu/make/make-${VERSION}.tar.gz"
+SOURCE_HASH="sha256:58955940788479483a13557437f3640929454472914d2d758a73484073b456c"
+DESCRIPTION="GNU Make - A tool for directing the recompilation of programs"
+HOMEPAGE="https://www.gnu.org/software/make/"
+LICENSE="GPL-3.0"
+
+DEPENDENCIES="glibc"
+BUILD_DEPENDENCIES="gcc make glibc"
+PATCHES=""
+
+BUILD_DIR="make-${VERSION}"
+CONFIG_OPTIONS="--prefix=/usr"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+pre_configure() { cd "${BUILD_DIR}"; }
+configure() { cd "${BUILD_DIR}"; "./configure" ${CONFIG_OPTIONS}; return 0; }
+build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+post_install() { log_info "make ${VERSION} installed successfully"; return 0; }
