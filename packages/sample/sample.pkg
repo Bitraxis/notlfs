@@ -1,0 +1,68 @@
+# Package metadata
+NAME="package-name"
+VERSION="1.0.0"
+SOURCE="https://example.com/package-1.0.0.tar.xz"
+SOURCE_HASH="sha256:abc123..."
+DESCRIPTION="Package description"
+HOMEPAGE="https://example.com"
+LICENSE="GPL-3.0"
+
+# Dependencies
+DEPENDENCIES="dep1 dep2 dep3"
+BUILD_DEPENDENCIES="build-dep1 build-dep2"
+RDEPENDENCIES="reverse-dep1 reverse-dep2"
+CONFLICTS="conflicting-pkg1 conflicting-pkg2"
+
+# Source configuration
+PATCHES="patch1.patch patch2.patch"
+BUILD_DIR="package-1.0.0"
+SOURCE_SUBDIR="source-subdir"
+
+# Build configuration
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+INSTALL_OPTIONS=""
+TEST_COMMAND="make check"
+
+# Service configuration (for init systems)
+SERVICE_NAME="service-name"
+SERVICE_TYPE="simple"  # simple, fork, oneshot, etc.
+SERVICE_DESCRIPTION="Service description"
+SERVICE_DEPENDENCIES="dep1 dep2"
+SERVICE_AFTER="service1 service2"
+SERVICE_BEFORE="service3 service4"
+
+# Build phase functions
+pre_configure() {
+    # Custom pre-configure steps
+    return 0
+}
+
+configure() {
+    # Custom configure step
+    ./configure ${CONFIG_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    return 0
+}
+
+build() {
+    # Custom build step
+    make ${MAKE_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    return 0
+}
+
+install() {
+    # Custom install step
+    make install ${INSTALL_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    return 0
+}
+
+# Init system integration
+init_generate_s6_service() {
+    # Generate service file for s6
+    return 0
+}
+
+init_generate_dinit_service() {
+    # Generate service file for dinit
+    return 0
+}

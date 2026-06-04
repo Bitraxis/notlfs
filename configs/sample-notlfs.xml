@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notlfs>
+    <!-- System Configuration -->
+    <system>
+        <name>my-system</name>
+        <architecture>x86_64</architecture>
+        <jobs>4</jobs>
+        <hostname>notlfs</hostname>
+        <timezone>UTC</timezone>
+        <locale>en_US.UTF-8</locale>
+    </system>
+    
+    <!-- Build Settings -->
+    <build>
+        <mode>interactive</mode>
+        <profile>base</profile>
+        <init_system>s6-rc</init_system>
+        <optimization>-O2 -pipe</optimization>
+        <strip_debug>false</strip_debug>
+    </build>
+    
+    <!-- Package Selection -->
+    <packages>
+        <category name="core" enabled="true">
+            <package name="binutils" enabled="true" />
+            <package name="gcc" enabled="true" />
+            <!-- ... -->
+        </category>
+        <category name="init" enabled="true">
+            <package name="s6-rc" enabled="true" />
+        </category>
+    </packages>
+    
+    <!-- Service Configuration -->
+    <services>
+        <service name="sshd" enabled="true" runlevel="default" />
+        <service name="dhcpcd" enabled="false" runlevel="default" />
+    </services>
+    
+    <!-- Custom Hooks -->
+    <hooks>
+        <hook stage="pre-build">
+            echo "Build started at $(date)"
+        </hook>
+    </hooks>
+</notlfs>
