@@ -1,5 +1,8 @@
 # NotLFS: Modular Linux Build Framework
+# !! Looking for maintainers mainly of packages to make installation nice also for profiles and package managers, system managers !!
 
+> **Preamble** Yes the docs are AI made, I'm too lazy, the actual code and scripts and the ideas were mine handwritten over weeks of work, still unfinished
+> 
 > **NotLFS** (Not Linux From Scratch) is a smart, extensible framework for building custom Linux systems from source, with multi-init system support.
 
 ---
