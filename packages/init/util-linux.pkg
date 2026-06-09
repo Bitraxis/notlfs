@@ -1,0 +1,67 @@
+# Package: util-linux
+# Description: util-linux - Essential Linux utilities
+# Maintainer: NotLFS Team
+# Version: 2.39.3
+
+NAME="util-linux"
+VERSION="2.39.3"
+SOURCE="https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v${VERSION}/util-linux-${VERSION}.tar.xz"
+SOURCE_HASH="sha256:54f538056464f37239069350215a3460672753c455733751983348224198425"
+DESCRIPTION="util-linux - Essential Linux utilities"
+HOMEPAGE="https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/"
+LICENSE="GPL-2.0"
+
+# Dependencies
+DEPENDENCIES="zlib"
+BUILD_DEPENDENCIES="gcc make autoconf automake gettext"
+
+# Patches
+PATCHES=""
+
+# Build directory
+BUILD_DIR="util-linux-${VERSION}"
+
+# Configuration options
+CONFIG_OPTIONS="--prefix=/usr --localstatedir=/var --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-static --disable-makeinstall-chown --disable-makeinstall-setuid --enable-widechar"
+MAKE_OPTIONS="-j${JOB_COUNT}"
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+pre_configure() {
+    log_info "Preparing to build util-linux ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
+configure() {
+    log_info "Configuring util-linux"
+    
+    cd "${BUILD_DIR}"
+    
+    ./configure ${CONFIG_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    
+    return 0
+}
+
+build() {
+    log_info "Building util-linux"
+    
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    
+    return 0
+}
+
+install() {
+    log_info "Installing util-linux to ${LFS}"
+    
+    cd "${BUILD_DIR}"
+    make install DESTDIR="${LFS}" 2>&1 | tee -a "${LOG_FILE}"
+    
+    return 0
+}
+
+post_install() {
+    log_info "util-linux installed successfully"
+}

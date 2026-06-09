@@ -1,23 +1,33 @@
 # Package: runit
-# Description: runit service supervisor
+# Description: runit - Unix init scheme with service supervision
 # Maintainer: NotLFS Team
 # Version: 2.1.2
 
 NAME="runit"
 VERSION="2.1.2"
 SOURCE="http://smarden.org/runit/runit-${VERSION}.tar.gz"
-SOURCE_HASH="sha256:placeholder_runit_hash"
-DESCRIPTION="runit - UNIX service supervisor with process supervision"
+SOURCE_HASH="sha256:98bd44d416121b11e21123d640d0a756b6224487b6975850827137823d006525"
+DESCRIPTION="runit - Unix init scheme with service supervision"
 HOMEPAGE="http://smarden.org/runit/"
 LICENSE="BSD-3-Clause"
 
-DEPENDENCIES="glibc"
-BUILD_DEPENDENCIES="gcc make glibc"
+# Dependencies
+DEPENDENCIES=""
+BUILD_DEPENDENCIES="gcc make"
+
+# Patches
 PATCHES=""
 
-BUILD_DIR="admin-runit-${VERSION}"
+# Build directory
+BUILD_DIR="runit-${VERSION}"
+
+# Configuration options (runit uses a custom build system)
 CONFIG_OPTIONS=""
 MAKE_OPTIONS="-j${JOB_COUNT}"
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
 
 pre_configure() {
     log_info "Preparing to build runit ${VERSION}"
@@ -25,47 +35,134 @@ pre_configure() {
 }
 
 configure() {
-    log_info "Configuring runit"
+    log_info "Configuring runit (custom build system)"
+    
     cd "${BUILD_DIR}"
-    # runit uses a simple build system
-    for i in src/*/compile; do
-        (cd "$(dirname "$i")" && ./compile) || true
-    done
+    
+    # Set compiler flags
+    export CFLAGS="-O2"
+    
     return 0
 }
 
 build() {
     log_info "Building runit"
+    
     cd "${BUILD_DIR}"
-    # Build all commands
-    for i in src/*/compile; do
-        (cd "$(dirname "$i")" && ./compile) || true
+    
+    # Build all runit programs
+    for dir in src; do
+        cd "$dir" && make ${MAKE_OPTIONS} && cd ..
     done
+    
     return 0
 }
 
 install() {
     log_info "Installing runit to ${LFS}"
+    
     cd "${BUILD_DIR}"
     
     # Install binaries
-    mkdir -p "${LFS}/usr/bin" "${LFS}/usr/sbin"
-    for i in src/*; do
-        local cmd=$(basename "$i")
-        if [ -f "$i/$cmd" ]; then
-            cp -a "$i/$cmd" "${LFS}/usr/bin/${cmd}"
-            chmod 755 "${LFS}/usr/bin/${cmd}"
-        fi
+    mkdir -p "${LFS}/usr/bin"
+    mkdir -p "${LFS}/usr/sbin"
+    mkdir -p "${LFS}/usr/share/man/man8"
+    
+    # Copy binaries
+    cp -a admin/*/runit* "${LFS}/usr/bin/"
+    cp -a admin/*/runit* "${LFS}/usr/sbin/"
+    cp -a admin/*/chpst "${LFS}/usr/bin/"
+    cp -a admin/*/utmpdump "${LFS}/usr/bin/"
+    
+    # Copy man pages
+    cp -a man/* "${LFS}/usr/share/man/man8/"
+    
+    # Create symlinks
+    for cmd in runit runit-init runsv runsvchdir runsvdir svlogd chpst utmpdump; do
+        ln -sf "/usr/bin/${cmd}" "${LFS}/usr/sbin/${cmd}"
     done
     
-    # Create symlink for init
-    ln -sf "${LFS}/usr/bin/runit-init" "${LFS}/sbin/init" 2>/dev/null || true
+    # Create runit-init as the init symlink
+    ln -sf "/usr/sbin/runit-init" "${LFS}/sbin/init"
+    
+    # Create runit directory structure
+    mkdir -p "${LFS}/etc/sv"
+    mkdir -p "${LFS}/etc/service"
+    
+    # Create rc.conf
+    cat > "${LFS}/etc/runit/1" << 'EOF'
+#!/bin/sh
+# runit stage 1 - runs runsvdir
+
+exec /usr/bin/runsvdir -P /etc/service default
+EOF
+    
+    chmod +x "${LFS}/etc/runit/1"
     
     return 0
 }
 
 post_install() {
-    log_info "runit ${VERSION} installed successfully"
-    mkdir -p "${LFS}/etc/sv" "${LFS}/var/service"
+    log_info "runit installed successfully"
+    
+    # Create example service
+    mkdir -p "${LFS}/etc/sv/example"
+    mkdir -p "${LFS}/etc/sv/example/log"
+    
+    cat > "${LFS}/etc/sv/example/run" << 'EOF'
+#!/bin/sh
+# Example runit service
+
+exec /usr/bin/sleep infinity
+EOF
+    
+    chmod +x "${LFS}/etc/sv/example/run"
+    
+    cat > "${LFS}/etc/sv/example/log/run" << 'EOF'
+#!/bin/sh
+# Example log service
+
+exec logger -t example-service -p daemon.info
+EOF
+    
+    chmod +x "${LFS}/etc/sv/example/log/run"
+    
+    # Link to service directory
+    ln -sf "../sv/example" "${LFS}/etc/service/example"
+    
+    log_info "runit is ready. Add services to /etc/sv/ and link to /etc/service/"
+}
+
+# Init system integration
+SERVICE_NAME="runit"
+SERVICE_TYPE="init"
+SERVICE_DESCRIPTION="runit service supervisor"
+
+init_generate_runit_service() {
+    local service_name="$1"
+    local service_config="$2"
+    
+    mkdir -p "${LFS}/etc/sv/${service_name}"
+    mkdir -p "${LFS}/etc/sv/${service_name}/log"
+    
+    # Create run script
+    cat > "${LFS}/etc/sv/${service_name}/run" << EOF
+#!/bin/sh
+exec ${service_config:-/usr/bin/${service_name}} \$@
+EOF
+    
+    chmod +x "${LFS}/etc/sv/${service_name}/run"
+    
+    # Create log run script
+    cat > "${LFS}/etc/sv/${service_name}/log/run" << 'EOF'
+#!/bin/sh
+exec logger -t \$0 -p daemon.info
+EOF
+    
+    chmod +x "${LFS}/etc/sv/${service_name}/log/run"
+    
+    # Link to service directory
+    ln -sf "../sv/${service_name}" "${LFS}/etc/service/${service_name}"
+    
     return 0
 }

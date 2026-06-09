@@ -1,5 +1,5 @@
 # Package: s6
-# Description: s6 supervision suite
+# Description: s6 supervision suite - minimalist service manager
 # Maintainer: NotLFS Team
 # Version: 2.11.3.0
 
@@ -11,74 +11,158 @@ DESCRIPTION="s6 supervision suite - minimalist service manager"
 HOMEPAGE="https://skarnet.org/software/s6/"
 LICENSE="ISC"
 
-DEPENDENCIES="skalibs execline"
-BUILD_DEPENDENCIES="gcc make skalibs execline"
+# Dependencies
+DEPENDENCIES=""
+BUILD_DEPENDENCIES="gcc make"
+
+# Patches
 PATCHES=""
 
+# Build directory
 BUILD_DIR="s6-${VERSION}"
+SOURCE_SUBDIR="s6-${VERSION}"
+
+# Configuration options (s6 uses a custom build system)
 CONFIG_OPTIONS=""
 MAKE_OPTIONS="-j${JOB_COUNT}"
 
+# s6-specific variables
+S6_PREFIX="/usr"
+S6_LIBDIR="/usr/lib/s6"
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
 pre_configure() {
     log_info "Preparing to build s6 ${VERSION}"
+    
+    # s6 uses a custom build system, not autotools
+    # We need to set up the compilation command
     cd "${BUILD_DIR}"
 }
 
 configure() {
     log_info "Configuring s6 (custom build system)"
+    
+    # s6 build system: compile with static linking
     cd "${BUILD_DIR}"
+    
+    # Create compilation command
     cat > "compile" << 'EOF'
 #!/bin/sh
 cc -O2 -static -o "$1" "$2"
 EOF
     chmod +x compile
+    
     return 0
 }
 
 build() {
     log_info "Building s6"
+    
     cd "${BUILD_DIR}"
+    
+    # Build all s6 programs
     ./compile package
+    
+    # Build shared libraries
     ./compile libs
+    
     return 0
 }
 
 install() {
     log_info "Installing s6 to ${LFS}"
-    cd "${BUILD_DIR}"
-    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/s6"
-    mkdir -p "${LFS}/usr/share/man/man1" "${LFS}/usr/share/man/man7"
     
-    for dir in bin command; do
+    cd "${BUILD_DIR}"
+    
+    # Install binaries
+    mkdir -p "${LFS}/bin"
+    mkdir -p "${LFS}/usr/bin"
+    mkdir -p "${LFS}/${S6_LIBDIR}"
+    mkdir -p "${LFS}/usr/share/man/man1"
+    mkdir -p "${LFS}/usr/share/man/man7"
+    
+    # Copy binaries
+    for dir in bin command devdue event fdholdp foresig foresh foreachp ftriggr1 \
+               ftriggrd getpid ipcserver ipcserverd log lockdir lockfile \
+               notifywhenup ondemand pgrphack pselect sig2 sigp pgrpd s6 \
+               s6-applyuidgid s6-envdir s6-envuidgid s6-fdholderd s6-ipcserver \
+               s6-ipcserverd s6-log s6-notifywhenup s6-privileges s6-setsid \
+               s6-sig2 s6-socketbinder s6-softlimit s6-supervise s6-svlink \
+               s6-svok s6-svscan s6-svscanctl s6-taia-chronocron s6-taia-clock \
+               s6-taia-cron s6-taia-once s6-taiaclockd s6-tlsc s6-ucspilogd \
+               scalar s6-echo s6-sleep s6-test s6-unixclient s6-unixserver \
+               s6-unixserver-socketbinder; do
         if [ -d "$dir" ]; then
             cp -a "$dir"/* "${LFS}/bin/"
-            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+            chmod 755 "${LFS}/bin/"*"$dir"*
         fi
     done
     
+    # Copy shared libraries
     for dir in include lib libexec; do
         if [ -d "$dir" ]; then
-            cp -a "$dir"/* "${LFS}/usr/lib/s6/"
+            cp -a "$dir"/* "${LFS}/${S6_LIBDIR}/"
         fi
     done
     
+    # Copy man pages
     for dir in doc/*/; do
         local man_section=$(basename "$dir")
         if [ "$man_section" = "man1" ] || [ "$man_section" = "man7" ]; then
-            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
-            cp -a "$dir"*.7 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/"
+            cp -a "$dir"*.7 "${LFS}/usr/share/man/${man_section}/"
         fi
     done
     
+    # Create symlinks for commonly used commands
     for cmd in s6-svscan s6-svscanctl s6-supervise s6-svok; do
-        ln -sf "${LFS}/usr/lib/s6/exexe/${cmd}" "${LFS}/bin/${cmd}" 2>/dev/null || true
+        ln -sf "${S6_LIBDIR}/exexe/${cmd}" "${LFS}/bin/${cmd}"
     done
     
     return 0
 }
 
 post_install() {
-    log_info "s6 ${VERSION} installed successfully"
-    mkdir -p "${LFS}/etc/s6" "${LFS}/etc/s6/current"
+    log_info "s6 installed successfully"
+    
+    # Create s6 directory structure
+    mkdir -p "${LFS}/etc/s6"
+    mkdir -p "${LFS}/etc/s6/current"
+    
+    log_info "s6 is ready. Use 's6-rc' package for a complete init system."
+}
+
+# Init system integration
+SERVICE_NAME="s6-svscan"
+SERVICE_TYPE="supervisor"
+SERVICE_DESCRIPTION="s6 service supervisor"
+
+init_generate_s6_service() {
+    local service_name="$1"
+    local service_config="$2"
+    
+    mkdir -p "${LFS}/etc/s6/${service_name}"
+    
+    cat > "${LFS}/etc/s6/${service_name}/run" << EOF
+#!/bin/sh
+exec s6-svscan /etc/s6/current
+EOF
+    
+    chmod +x "${LFS}/etc/s6/${service_name}/run"
+    
+    # Create finish script
+    cat > "${LFS}/etc/s6/${service_name}/finish" << 'EOF'
+#!/bin/sh
+exec s6-notifywhenup "$1"
+EOF
+    
+    chmod +x "${LFS}/etc/s6/${service_name}/finish"
+    
+    # Link to current
+    ln -sf "../${service_name}" "${LFS}/etc/s6/current/${service_name}"
+    
     return 0
 }

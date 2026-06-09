@@ -1,5 +1,5 @@
 # Package: s6-rc
-# Description: s6-rc service manager
+# Description: s6-rc service manager - dependency-based service management
 # Maintainer: NotLFS Team
 # Version: 0.5.4.0
 
@@ -11,13 +11,24 @@ DESCRIPTION="s6-rc service manager - dependency-based service management for s6"
 HOMEPAGE="https://skarnet.org/software/s6-rc/"
 LICENSE="ISC"
 
-DEPENDENCIES="s6 skalibs execline"
-BUILD_DEPENDENCIES="gcc make s6 skalibs execline"
+# Dependencies
+DEPENDENCIES="s6 skalibs"
+BUILD_DEPENDENCIES="s6 skalibs gcc make"
+
+# Patches
 PATCHES=""
 
+# Build directory
 BUILD_DIR="s6-rc-${VERSION}"
+SOURCE_SUBDIR="s6-rc-${VERSION}"
+
+# Configuration options
 CONFIG_OPTIONS=""
 MAKE_OPTIONS="-j${JOB_COUNT}"
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
 
 pre_configure() {
     log_info "Preparing to build s6-rc ${VERSION}"
@@ -26,49 +37,70 @@ pre_configure() {
 
 configure() {
     log_info "Configuring s6-rc (custom build system)"
+    
     cd "${BUILD_DIR}"
+    
+    # Create compilation command
     cat > "compile" << 'EOF'
 #!/bin/sh
 cc -O2 -static -o "$1" "$2"
 EOF
     chmod +x compile
+    
     return 0
 }
 
 build() {
     log_info "Building s6-rc"
+    
     cd "${BUILD_DIR}"
+    
+    # Build all s6-rc programs
     ./compile package
+    
+    # Build shared libraries
     ./compile libs
+    
     return 0
 }
 
 install() {
     log_info "Installing s6-rc to ${LFS}"
-    cd "${BUILD_DIR}"
-    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/s6-rc"
     
+    cd "${BUILD_DIR}"
+    
+    # Install binaries
+    mkdir -p "${LFS}/bin"
+    mkdir -p "${LFS}/usr/bin"
+    mkdir -p "${LFS}/usr/lib/s6-rc"
+    mkdir -p "${LFS}/usr/share/man/man1"
+    
+    # Copy binaries
     for dir in bin command lib libexec; do
         if [ -d "$dir" ]; then
             cp -a "$dir"/* "${LFS}/bin/"
-            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+            chmod 755 "${LFS}/bin/"*"$dir"*
         fi
     done
     
+    # Copy shared libraries
     if [ -d "include" ]; then
         cp -a include/* "${LFS}/usr/include/s6-rc/"
     fi
     
+    # Copy man pages
     for dir in doc/*/; do
         local man_section=$(basename "$dir")
         if [ "$man_section" = "man1" ]; then
-            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/"
         fi
     done
     
-    for cmd in s6-rc s6-rc-bundle s6-rc-compile s6-rc-dump s6-rc-edit s6-rc-init s6-rc-reload s6-rc-update; do
+    # Create symlinks for commonly used commands
+    for cmd in s6-rc s6-rc-bundle s6-rc-compile s6-rc-dump s6-rc-edit \
+               s6-rc-init s6-rc-reload s6-rc-update; do
         if [ -f "${LFS}/bin/${cmd}" ]; then
-            ln -sf "${LFS}/bin/${cmd}" "${LFS}/usr/bin/${cmd}" 2>/dev/null || true
+            ln -sf "${LFS}/bin/${cmd}" "${LFS}/usr/bin/${cmd}"
         fi
     done
     
@@ -76,7 +108,69 @@ install() {
 }
 
 post_install() {
-    log_info "s6-rc ${VERSION} installed successfully"
-    mkdir -p "${LFS}/etc/s6-rc" "${LFS}/etc/s6-rc/current" "${LFS}/etc/s6-rc/rc.d"
+    log_info "s6-rc installed successfully"
+    
+    # Create s6-rc directory structure
+    mkdir -p "${LFS}/etc/s6-rc"
+    mkdir -p "${LFS}/etc/s6-rc/current"
+    mkdir -p "${LFS}/etc/s6-rc/rc.d"
+    
+    # Create default database
+    cat > "${LFS}/etc/s6-rc/db" << 'EOF'
+# s6-rc database
+# This is a minimal database. Add your services below.
+# Format: <name> <type> <path> [dependencies...]
+# Types: oneshot, longrun, bundle
+
+# Example service (commented out)
+# my-service longrun /etc/s6-rc/rc.d/my-service
+EOF
+    
+    # Create rc.init for s6-rc
+    cat > "${LFS}/etc/s6-rc/current/rc.init" << 'EOF'
+#!/bin/sh
+# s6-rc init script
+
+exec s6-rc-init /etc/s6-rc/current default
+EOF
+    
+    chmod +x "${LFS}/etc/s6-rc/current/rc.init"
+    
+    # Create symlink for init
+    ln -sf "/etc/s6-rc/current/rc.init" "${LFS}/sbin/init"
+    
+    log_info "s6-rc is ready. Add services to /etc/s6-rc/rc.d/"
+}
+
+# Init system integration
+SERVICE_NAME="s6-rc"
+SERVICE_TYPE="init"
+SERVICE_DESCRIPTION="s6-rc service manager"
+
+init_generate_s6_rc_service() {
+    local service_name="$1"
+    local service_config="$2"
+    
+    mkdir -p "${LFS}/etc/s6-rc/rc.d/${service_name}"
+    
+    # Create run script
+    cat > "${LFS}/etc/s6-rc/rc.d/${service_name}/run" << EOF
+#!/bin/sh
+exec ${service_config:-/usr/bin/${service_name}} \$@
+EOF
+    
+    chmod +x "${LFS}/etc/s6-rc/rc.d/${service_name}/run"
+    
+    # Create finish script (optional)
+    cat > "${LFS}/etc/s6-rc/rc.d/${service_name}/finish" << 'EOF'
+#!/bin/sh
+exec s6-notifywhenup "$1"
+EOF
+    
+    chmod +x "${LFS}/etc/s6-rc/rc.d/${service_name}/finish"
+    
+    # Add to database
+    echo "${service_name} longrun /etc/s6-rc/rc.d/${service_name}" >> "${LFS}/etc/s6-rc/db"
+    
     return 0
 }

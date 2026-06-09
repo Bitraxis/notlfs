@@ -11,13 +11,24 @@ DESCRIPTION="skalibs - libraries for skarnet.org software (required by s6)"
 HOMEPAGE="https://skarnet.org/software/skalibs/"
 LICENSE="ISC"
 
+# Dependencies
 DEPENDENCIES=""
 BUILD_DEPENDENCIES="gcc make"
+
+# Patches
 PATCHES=""
 
+# Build directory
 BUILD_DIR="skalibs-${VERSION}"
+SOURCE_SUBDIR="skalibs-${VERSION}"
+
+# Configuration options
 CONFIG_OPTIONS=""
 MAKE_OPTIONS="-j${JOB_COUNT}"
+
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
 
 pre_configure() {
     log_info "Preparing to build skalibs ${VERSION}"
@@ -26,43 +37,78 @@ pre_configure() {
 
 configure() {
     log_info "Configuring skalibs (custom build system)"
+    
     cd "${BUILD_DIR}"
+    
+    # Create compilation command
     cat > "compile" << 'EOF'
 #!/bin/sh
 cc -O2 -static -o "$1" "$2"
 EOF
     chmod +x compile
+    
     return 0
 }
 
 build() {
     log_info "Building skalibs"
+    
     cd "${BUILD_DIR}"
+    
+    # Build all skalibs programs
     ./compile package
+    
+    # Build shared libraries
     ./compile libs
+    
     return 0
 }
 
 install() {
     log_info "Installing skalibs to ${LFS}"
+    
     cd "${BUILD_DIR}"
-    mkdir -p "${LFS}/bin" "${LFS}/usr/bin" "${LFS}/usr/lib/skalibs" "${LFS}/usr/include/skalibs"
+    
+    # Install binaries
+    mkdir -p "${LFS}/bin"
+    mkdir -p "${LFS}/usr/bin"
+    mkdir -p "${LFS}/usr/lib/skalibs"
+    mkdir -p "${LFS}/usr/include/skalibs"
+    mkdir -p "${LFS}/usr/share/man/man1"
+    mkdir -p "${LFS}/usr/share/man/man3"
+    mkdir -p "${LFS}/usr/share/man/man7"
+    
+    # Copy binaries
     for dir in bin command; do
         if [ -d "$dir" ]; then
             cp -a "$dir"/* "${LFS}/bin/"
-            chmod 755 "${LFS}/bin/"*"$dir"* 2>/dev/null || true
+            chmod 755 "${LFS}/bin/"*"$dir"*
         fi
     done
+    
+    # Copy shared libraries
     if [ -d "lib" ]; then
         cp -a lib/* "${LFS}/usr/lib/skalibs/"
     fi
+    
+    # Copy includes
     if [ -d "include" ]; then
         cp -a include/* "${LFS}/usr/include/skalibs/"
     fi
+    
+    # Copy man pages
+    for dir in doc/*/; do
+        local man_section=$(basename "$dir")
+        if [ "$man_section" = "man1" ] || [ "$man_section" = "man3" ] || [ "$man_section" = "man7" ]; then
+            cp -a "$dir"*.1 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+            cp -a "$dir"*.3 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+            cp -a "$dir"*.7 "${LFS}/usr/share/man/${man_section}/" 2>/dev/null || true
+        fi
+    done
+    
     return 0
 }
 
 post_install() {
-    log_info "skalibs ${VERSION} installed successfully"
-    return 0
+    log_info "skalibs installed successfully"
 }

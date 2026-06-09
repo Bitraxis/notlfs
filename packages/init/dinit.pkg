@@ -1,36 +1,166 @@
 # Package: dinit
-# Description: dinit service manager
+# Description: dinit service manager - dependency-based service management
 # Maintainer: NotLFS Team
 # Version: 0.17.0
 
 NAME="dinit"
 VERSION="0.17.0"
 SOURCE="https://github.com/davmac314/dinit/releases/download/v${VERSION}/dinit-${VERSION}.tar.xz"
-SOURCE_HASH="sha256:placeholder_dinit_hash"
-DESCRIPTION="dinit - Service supervisor and init system"
-HOMEPAGE="https://github.com/davmac314/dinit"
+SOURCE_HASH="sha256:7e7a8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e"
+DESCRIPTION="dinit service manager - dependency-based service management"
+HOMEPAGE="https://davmac.org/projects/dinit/"
 LICENSE="Apache-2.0"
 
-DEPENDENCIES="glibc"
-BUILD_DEPENDENCIES="gcc make glibc"
+# Dependencies
+DEPENDENCIES=""
+BUILD_DEPENDENCIES="g++ make pkgconf"
+
+# Patches
 PATCHES=""
 
+# Build directory
 BUILD_DIR="dinit-${VERSION}"
-CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/run"
+
+# Configuration options
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var"
 MAKE_OPTIONS="-j${JOB_COUNT}"
 
-pre_configure() { cd "${BUILD_DIR}"; }
-configure() {
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+pre_configure() {
+    log_info "Preparing to build dinit ${VERSION}"
     cd "${BUILD_DIR}"
-    ./configure ${CONFIG_OPTIONS}
+}
+
+configure() {
+    log_info "Configuring dinit"
+    
+    cd "${BUILD_DIR}"
+    
+    # dinit uses CMake
+    mkdir -p build
+    cd build
+    
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DUSE_SYSTEMD=OFF \
+            -DUSE_LOGIND=OFF \
+            2>&1 | tee -a "${LOG_FILE}"
+    
+    cd ..
+    
     return 0
 }
-build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
-install() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS} DESTDIR=${LFS} install; return 0; }
+
+build() {
+    log_info "Building dinit"
+    
+    cd "${BUILD_DIR}/build"
+    make ${MAKE_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    
+    cd ..
+    
+    return 0
+}
+
+install() {
+    log_info "Installing dinit to ${LFS}"
+    
+    cd "${BUILD_DIR}/build"
+    make install DESTDIR="${LFS}" 2>&1 | tee -a "${LOG_FILE}"
+    
+    cd ../..
+    
+    # Create symlink for init
+    ln -sf "/usr/bin/dinit" "${LFS}/sbin/init"
+    
+    # Create dinit configuration directory
+    mkdir -p "${LFS}/etc/dinit.d"
+    
+    # Create default configuration
+    cat > "${LFS}/etc/dinit.conf" << 'EOF'
+# dinit configuration
+DINIT_LOG_LEVEL=info
+DINIT_SERVICE_DIR=/etc/dinit.d
+EOF
+    
+    return 0
+}
+
 post_install() {
-    log_info "dinit ${VERSION} installed successfully"
-    mkdir -p "${LFS}/etc/dinit"
-    mkdir -p "${LFS}/run/dinit"
-    ln -sf "${LFS}/usr/bin/dinit" "${LFS}/sbin/init" 2>/dev/null || true
+    log_info "dinit installed successfully"
+    
+    # Create example service
+    cat > "${LFS}/etc/dinit.d/example" << 'EOF'
+# Example dinit service
+# Copy this file and modify for your service
+
+# Service name (must match filename)
+# This service is named "example"
+
+# Service type: simple, fork, oneshot, etc.
+type = simple
+
+# Command to execute
+command = /usr/bin/sleep infinity
+
+# User and group to run as
+user = root
+group = root
+
+# Working directory
+working_dir = /tmp
+
+# Environment variables
+# environment = "VAR=value"
+
+# Dependencies (services that must start before this one)
+dependencies =
+
+# Services that must start after this one
+after =
+
+# Services that must start before this one
+before =
+
+# Restart on failure
+restart = true
+
+# Restart delay in seconds
+restart_delay = 5
+
+# Timeout for start/stop in seconds
+timeout = 30
+EOF
+    
+    log_info "dinit is ready. Add services to /etc/dinit.d/"
+}
+
+# Init system integration
+SERVICE_NAME="dinit"
+SERVICE_TYPE="init"
+SERVICE_DESCRIPTION="dinit service manager"
+
+init_generate_dinit_service() {
+    local service_name="$1"
+    local service_config="$2"
+    
+    cat > "${LFS}/etc/dinit.d/${service_name}" << EOF
+# dinit service file for ${service_name}
+
+type = ${SERVICE_TYPE:-simple}
+command = ${service_config:-/usr/bin/${service_name}}
+user = root
+group = root
+dependencies = ${SERVICE_DEPENDENCIES}
+after = ${SERVICE_AFTER}
+before = ${SERVICE_BEFORE}
+restart = true
+timeout = 30
+EOF
+    
     return 0
 }

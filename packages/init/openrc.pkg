@@ -1,39 +1,169 @@
 # Package: openrc
-# Description: OpenRC init system
+# Description: OpenRC - Dependency-based init system
 # Maintainer: NotLFS Team
-# Version: 0.49
+# Version: 0.50.2
 
 NAME="openrc"
-VERSION="0.49"
+VERSION="0.50.2"
 SOURCE="https://github.com/OpenRC/openrc/archive/refs/tags/${VERSION}.tar.gz"
-SOURCE_HASH="sha256:placeholder_openrc_hash"
+SOURCE_HASH="sha256:abc123def456..."  # Update with actual hash
 DESCRIPTION="OpenRC - Dependency-based init system"
 HOMEPAGE="https://github.com/OpenRC/openrc"
 LICENSE="BSD-2-Clause"
 
-DEPENDENCIES="glibc bash"
-BUILD_DEPENDENCIES="gcc make glibc bash"
+# Dependencies
+DEPENDENCIES="pam"
+BUILD_DEPENDENCIES="gcc make autoconf automake"
+
+# Patches
 PATCHES=""
 
+# Build directory
 BUILD_DIR="openrc-${VERSION}"
-CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/run --sbindir=/sbin"
+
+# Configuration options
+CONFIG_OPTIONS="--prefix=/usr --sysconfdir=/etc --localstatedir=/var --disable-pam --enable-bash"
 MAKE_OPTIONS="-j${JOB_COUNT}"
 
-pre_configure() { cd "${BUILD_DIR}"; }
+# =============================================================================
+# BUILD FUNCTIONS
+# =============================================================================
+
+pre_configure() {
+    log_info "Preparing to build OpenRC ${VERSION}"
+    cd "${BUILD_DIR}"
+}
+
 configure() {
+    log_info "Configuring OpenRC"
+    
     cd "${BUILD_DIR}"
-    ./configure ${CONFIG_OPTIONS}
+    
+    # Generate configure script
+    autoreconf -fvi 2>&1 | tee -a "${LOG_FILE}"
+    
+    ./configure ${CONFIG_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    
     return 0
 }
-build() { cd "${BUILD_DIR}"; make ${MAKE_OPTIONS}; return 0; }
+
+build() {
+    log_info "Building OpenRC"
+    
+    cd "${BUILD_DIR}"
+    make ${MAKE_OPTIONS} 2>&1 | tee -a "${LOG_FILE}"
+    
+    return 0
+}
+
 install() {
+    log_info "Installing OpenRC to ${LFS}"
+    
     cd "${BUILD_DIR}"
-    make ${MAKE_OPTIONS} DESTDIR=${LFS} install
-    ln -sf "${LFS}/sbin/openrc-init" "${LFS}/sbin/init" 2>/dev/null || true
+    make install DESTDIR="${LFS}" 2>&1 | tee -a "${LOG_FILE}"
+    
+    # Create init symlink
+    ln -sf "/usr/sbin/openrc-init" "${LFS}/sbin/init"
+    
+    # Create OpenRC directory structure
+    mkdir -p "${LFS}/etc/runlevels"
+    mkdir -p "${LFS}/etc/init.d"
+    mkdir -p "${LFS}/etc/conf.d"
+    mkdir -p "${LFS}/etc/local.d"
+    mkdir -p "${LFS}/etc/rc.conf.d"
+    
+    # Create basic runlevels
+    for level in boot sysinit; do
+        mkdir -p "${LFS}/etc/runlevels/${level}"
+    done
+    
+    # Create rc.conf
+    cat > "${LFS}/etc/rc.conf" << 'EOF'
+# /etc/rc.conf
+
+# System configuration
+rc_sys="laptop"
+rc_logger="yes"
+rc_depend_strict="no"
+
+# Network configuration
+hostname="${HOSTNAME:-notlfs}"
+EOF
+    
+    # Create inittab
+    cat > "${LFS}/etc/inittab" << 'EOF'
+# /etc/inittab
+
+# Boot time sysinit
+::sysinit:/sbin/openrc sysinit
+
+# Default runlevel
+::runlevel:3:wait:/sbin/openrc default
+
+# Shutdown
+::shutdown:/sbin/openrc shutdown
+EOF
+    
     return 0
 }
+
 post_install() {
-    log_info "openrc ${VERSION} installed successfully"
-    mkdir -p "${LFS}/etc/rc.d" "${LFS}/etc/conf.d" "${LFS}/etc/init.d" "${LFS}/run/openrc"
+    log_info "OpenRC installed successfully"
+    
+    # Create example service
+    cat > "${LFS}/etc/init.d/example" << 'EOF'
+#!/sbin/openrc-run
+# Distributed under the terms of the MIT License
+
+name="example"
+description="Example OpenRC service"
+command="/usr/bin/sleep"
+command_args="infinity"
+pidfile="/run/${name}.pid"
+output_log="/var/log/${name}.log"
+error_log="/var/log/${name}.err"
+
+start_stop_daemon_args="--stdout \${output_log} --stderr \${error_log}"
+EOF
+    
+    chmod +x "${LFS}/etc/init.d/example"
+    
+    # Enable in boot runlevel
+    ln -sf "../init.d/example" "${LFS}/etc/runlevels/boot/example"
+    
+    log_info "OpenRC is ready. Add services to /etc/init.d/ and enable in /etc/runlevels/<level>/"
+}
+
+# Init system integration
+SERVICE_NAME="openrc"
+SERVICE_TYPE="init"
+SERVICE_DESCRIPTION="OpenRC init system"
+
+init_generate_openrc_service() {
+    local service_name="$1"
+    local service_config="$2"
+    
+    cat > "${LFS}/etc/init.d/${service_name}" << EOF
+#!/sbin/openrc-run
+# Distributed under the terms of the MIT License
+
+name="${service_name}"
+description="${SERVICE_DESCRIPTION:-${service_name} service}"
+command="${service_config:-/usr/bin/${service_name}}"
+command_args="\$@"
+pidfile="/run/\${service_name}.pid"
+output_log="/var/log/\${service_name}.log"
+error_log="/var/log/\${service_name}.err"
+
+${SERVICE_DEPENDENCIES:+depend="\${SERVICE_DEPENDENCIES}"}
+
+supervise_daemon_args="--stdout \${output_log} --stderr \${error_log}"
+EOF
+    
+    chmod +x "${LFS}/etc/init.d/${service_name}"
+    
+    # Enable in boot runlevel
+    ln -sf "../init.d/${service_name}" "${LFS}/etc/runlevels/boot/${service_name}"
+    
     return 0
 }
